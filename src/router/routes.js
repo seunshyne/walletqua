@@ -1,9 +1,51 @@
 const routes = [
-  {
-    path: '/',
+{
+  path: '/',
     component: () => import('layouts/MainLayout.vue'),
     children: [
-      { path: '', component: () => import('pages/IndexPage.vue') }
+      { 
+        path: '', 
+        name: 'home',
+        component: () => import('pages/IndexPage.vue') 
+      },
+      { 
+        path: 'dashboard', 
+        name: 'dashboard',
+        component: () => import('pages/Dashboard.vue'),
+        meta: { requiresAuth: true }
+      },
+
+      { 
+        path: 'send', 
+        name: 'send',
+        component: () => import('pages/Send.vue'),
+        meta: { requiresAuth: true }
+      },
+
+      { 
+        path: 'receive', 
+        name: 'receive',
+        component: () => import('pages/Receive.vue'),
+        meta: { requiresAuth: true }
+      },
+      { 
+        path: 'register', 
+        name: 'register',
+        component: () => import('pages/auth/Register.vue'),
+        meta: { guestOnly: true }
+      },
+      { 
+        path: 'login', 
+        name: 'login',
+        component: () => import('pages/auth/Login.vue'),
+        meta: { guestOnly: true }
+      },
+      { 
+        path: 'verify-email', 
+        name: 'verify-email',
+        component: () => import('pages/auth/VerifyEmail.vue'),
+        meta: { guestOnly: true }
+      },
     ]
   },
 
