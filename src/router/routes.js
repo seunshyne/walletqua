@@ -21,13 +21,6 @@ const routes = [
         component: () => import('pages/Send.vue'),
         meta: { requiresAuth: true }
       },
-
-      { 
-        path: 'receive', 
-        name: 'receive',
-        component: () => import('pages/Receive.vue'),
-        meta: { requiresAuth: true }
-      },
       { 
         path: 'transaction-history', 
         name: 'transaction-history',
