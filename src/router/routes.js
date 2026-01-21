@@ -29,6 +29,12 @@ const routes = [
         meta: { requiresAuth: true }
       },
       { 
+        path: 'transaction-history', 
+        name: 'transaction-history',
+        component: () => import('pages/TransactionHistory.vue'),
+        meta: { requiresAuth: true }
+      },
+      { 
         path: 'register', 
         name: 'register',
         component: () => import('pages/auth/Register.vue'),

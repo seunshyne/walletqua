@@ -1,7 +1,6 @@
 <template>
   <q-page
-    class="window-height window-width row justify-center items-center bg-primary"
-    
+    class="window-height window-width row justify-center items-center auth-page"
   >
     <div class="column q-pa-lg">
       <div class="row">

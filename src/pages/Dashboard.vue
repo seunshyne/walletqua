@@ -71,12 +71,13 @@ onMounted(async () => {
 // }
 
 const transactions = ref([
-  { id: 1, type: 'Credit', amount: 500, date: '2026-01-09' },
-  { id: 2, type: 'Debit', amount: 200, date: '2026-01-08' },
+  { id: 1, type: 'Credit', amount: 500, date: '2026-01-09', description: 'Salary' },
+  { id: 2, type: 'Debit', amount: 200, date: '2026-01-08', description: 'Groceries' },
 ]);
 
 const columns = [
   { name: 'date', label: 'Date', field: 'date', align: 'left' },
+  { name: 'description', label: 'Description', field: 'description', align: 'left' },
   { name: 'type', label: 'Type', field: 'type' },
   { name: 'amount', label: 'Amount', field: 'amount', align: 'right' },
 ];

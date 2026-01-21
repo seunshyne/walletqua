@@ -11,7 +11,7 @@ const WALLET_ENDPOINTS = {
   GET_BALANCE: (id) => `/wallets/${id}/balance`,
   SEND: '/transactions/send',
   RECEIVE: '/transactions/receive',
-  GET_TRANSACTIONS: (id) => `/wallets/${id}/transactions`,
+  GET_TRANSACTIONS: '/transactions',
 }
 
 export const walletService = {
@@ -81,10 +81,16 @@ export const walletService = {
         message: response.data.message || 'Transaction sent successfully',
       }
     } catch (error) {
+      // Extract detailed error information
+      const errorData = error.response?.data || error.data || {}
+      const errorMessage = errorData.message || error.message || 'Transaction failed'
+      const errors = errorData.errors || {}
+
       return {
         success: false,
-        error: error.data?.errors || { general: error.message },
-        message: error.data?.message || '',
+        error: errors,
+        message: errorMessage,
+        statusCode: error.response?.status || error.status
       }
     }
   },
@@ -111,17 +117,17 @@ export const walletService = {
   /**
    * Get transaction history
    */
-  async getTransactions(walletId, filters = {}) {
+  async getTransactions(filters = {}) {
     try {
       const queryString = new URLSearchParams(filters).toString()
       const endpoint = queryString
-        ? `${WALLET_ENDPOINTS.GET_TRANSACTIONS(walletId)}?${queryString}`
-        : WALLET_ENDPOINTS.GET_TRANSACTIONS(walletId)
+        ? `${WALLET_ENDPOINTS.GET_TRANSACTIONS}?${queryString}`
+        : WALLET_ENDPOINTS.GET_TRANSACTIONS
 
       const response = await apiClient.get(endpoint)
       return {
         success: true,
-        transactions: response.data.transactions || response.data,
+        transactions: response.data.data || response.data.transactions || response.data,
       }
     } catch (error) {
       return {

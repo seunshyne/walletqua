@@ -1,5 +1,5 @@
 <template>
-  <q-layout view="lHh Lpr lFf">
+  <q-layout view="lHh Lpr lFf" class="main-layout">
     <q-header elevated>
       <q-toolbar>
         <q-btn
@@ -15,8 +15,11 @@
         
          <!-- LOGGED IN -->
         <template v-if="isAuthenticated">
-          <div class="q-mr-md">
-            Welcome <strong>{{ user?.name }}</strong>
+          <div class="user-info q-mr-md">
+            <div class="text-subtitle2">{{ user?.name }}</div>
+            <div class="text-caption text-grey wallet-address">
+              📍 {{ walletAddress }}
+            </div>
           </div>
 
           <q-btn flat label="Logout" @click="logout" />
@@ -36,13 +39,111 @@
 
     <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
       <q-list>
-        <q-item-label header> Essential Links </q-item-label>
+        <!-- Logo/Title -->
+        <q-item-label header class="text-weight-bold">Prime Wallet</q-item-label>
 
-        <EssentialLink
-          v-for="link in linksList"
-          :key="link.title"
-          v-bind="link"
-        />
+        <!-- Authenticated User Menu -->
+        <template v-if="isAuthenticated">
+          <!-- User Profile Section -->
+          <q-item-label header class="text-caption">{{ user?.name }}</q-item-label>
+
+          <!-- Dashboard -->
+          <q-item clickable to="dashboard" active-class="bg-primary text-white">
+            <q-item-section avatar>
+              <q-icon name="dashboard" />
+            </q-item-section>
+            <q-item-section>Dashboard</q-item-section>
+          </q-item>
+
+          <!-- Send Money -->
+          <q-item clickable to="send" active-class="bg-primary text-white">
+            <q-item-section avatar>
+              <q-icon name="send" />
+            </q-item-section>
+            <q-item-section>Send Money</q-item-section>
+          </q-item>
+
+          <!-- Receive Money -->
+          <q-item clickable to="receive" active-class="bg-primary text-white">
+            <q-item-section avatar>
+              <q-icon name="call_received" />
+            </q-item-section>
+            <q-item-section>Receive Money</q-item-section>
+          </q-item>
+
+          <!-- Transaction History -->
+          <q-item clickable to="transaction-history" active-class="bg-primary text-white">
+            <q-item-section avatar>
+              <q-icon name="history" />
+            </q-item-section>
+            <q-item-section>Transaction History</q-item-section>
+          </q-item>
+
+          <!-- Settings -->
+          <q-item clickable active-class="bg-primary text-white">
+            <q-item-section avatar>
+              <q-icon name="settings" />
+            </q-item-section>
+            <q-item-section>Settings</q-item-section>
+          </q-item>
+
+          <!-- Divider -->
+          <q-separator class="q-my-md" />
+
+          <!-- Help & Support -->
+          <q-item clickable active-class="bg-primary text-white">
+            <q-item-section avatar>
+              <q-icon name="help" />
+            </q-item-section>
+            <q-item-section>Help & Support</q-item-section>
+          </q-item>
+
+          <!-- About -->
+          <q-item clickable active-class="bg-primary text-white">
+            <q-item-section avatar>
+              <q-icon name="info" />
+            </q-item-section>
+            <q-item-section>About</q-item-section>
+          </q-item>
+        </template>
+
+        <!-- Guest User Menu -->
+        <template v-else>
+          <!-- Home -->
+          <q-item clickable to="/" active-class="bg-primary text-white">
+            <q-item-section avatar>
+              <q-icon name="home" />
+            </q-item-section>
+            <q-item-section>Home</q-item-section>
+          </q-item>
+
+          <!-- Login -->
+          <q-item clickable to="login" active-class="bg-primary text-white">
+            <q-item-section avatar>
+              <q-icon name="login" />
+            </q-item-section>
+            <q-item-section>Login</q-item-section>
+          </q-item>
+
+          <!-- Register -->
+          <q-item clickable to="register" active-class="bg-primary text-white">
+            <q-item-section avatar>
+              <q-icon name="app_registration" />
+            </q-item-section>
+            <q-item-section>Register</q-item-section>
+          </q-item>
+
+          <!-- Divider -->
+          <q-separator class="q-my-md" />
+
+          <!-- About -->
+          <q-item clickable active-class="bg-primary text-white">
+            <q-item-section avatar>
+              <q-icon name="info" />
+            </q-item-section>
+            <q-item-section>About</q-item-section>
+          </q-item>
+        </template>
       </q-list>
     </q-drawer>
 
@@ -53,8 +154,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from "vue";
-import EssentialLink from "components/EssentialLink.vue";
+import { ref, watch, computed } from "vue";
 import { useAuthStore } from "src/stores/auth";
 import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router' 
@@ -63,6 +163,7 @@ const router = useRouter();
 const authStore = useAuthStore();
 
 const { user, isAuthenticated } = storeToRefs(authStore);
+const walletAddress = computed(() => authStore.getWalletAddress);
 
 watch(isAuthenticated, (Val) => {
   if (Val) {
@@ -75,51 +176,6 @@ const logout = async () => {
   await router.push({ path: '/' });
 };
 
-const linksList = [
-  {
-    title: "Docs",
-    caption: "quasar.dev",
-    icon: "school",
-    link: "https://quasar.dev",
-  },
-  {
-    title: "Github",
-    caption: "github.com/quasarframework",
-    icon: "code",
-    link: "https://github.com/quasarframework",
-  },
-  {
-    title: "Discord Chat Channel",
-    caption: "chat.quasar.dev",
-    icon: "chat",
-    link: "https://chat.quasar.dev",
-  },
-  {
-    title: "Forum",
-    caption: "forum.quasar.dev",
-    icon: "record_voice_over",
-    link: "https://forum.quasar.dev",
-  },
-  {
-    title: "Twitter",
-    caption: "@quasarframework",
-    icon: "rss_feed",
-    link: "https://twitter.quasar.dev",
-  },
-  {
-    title: "Facebook",
-    caption: "@QuasarFramework",
-    icon: "public",
-    link: "https://facebook.quasar.dev",
-  },
-  {
-    title: "Quasar Awesome",
-    caption: "Community Quasar projects",
-    icon: "favorite",
-    link: "https://awesome.quasar.dev",
-  },
-];
-
 const leftDrawerOpen = ref(false);
 
 function toggleLeftDrawer() {
@@ -128,6 +184,32 @@ function toggleLeftDrawer() {
 </script>
 
 <style scoped>
+.main-layout {
+  background-image: url('/images/wallet-bg.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-color: #1a1a1a;
+  min-height: 100vh;
+}
+
+.main-layout::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url('/images/wallet-bg.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  z-index: -1;
+  pointer-events: none;
+}
+
 .nav-link {
   color: rgba(252, 249, 249, 0.986);
   transition: color 0.2s ease, opacity 0.2s ease;
@@ -140,5 +222,19 @@ function toggleLeftDrawer() {
 }
 .nav-link:active {
   opacity: 0.6;
-}   
+}
+
+.user-info {
+  text-align: right;
+  color: white;
+}
+
+.wallet-address {
+  font-family: monospace;
+  letter-spacing: 0.5px;
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 </style>

@@ -1,5 +1,6 @@
 import { defineStore, acceptHMRUpdate } from 'pinia'
 import { useAuthStore } from 'src/stores/auth'
+import { walletService } from 'src/services/walletService'
 
 
 export const useTransactionStore = defineStore('transaction', {
@@ -35,21 +36,36 @@ export const useTransactionStore = defineStore('transaction', {
 
   actions: {
      async fetchTransactions() {
-            const authStore = useAuthStore();
             this.loading = true;
             this.error = "";
 
             try {
-                const res = await fetch("/api/transactions", {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem("token")}`,
-                    },
-                });
-
-                const data = await res.json();
-
-                this.transactions = Array.isArray(data.data) ? data.data : [];
-                // FIXED FETCH
+                const result = await walletService.getTransactions();
+                
+                if (result.success) {
+                  // Map the transactions to ensure they have the correct structure
+                  this.transactions = Array.isArray(result.transactions) 
+                    ? result.transactions.map(transaction => {
+                        const txType = transaction.type || (transaction.transaction_type === 'credit' ? 'credit' : 'debit');
+                        return {
+                          ...transaction,
+                          type: txType,
+                          status: transaction.status || 'completed',
+                          date: transaction.created_at || transaction.date,
+                          description: transaction.description || transaction.note || transaction.memo || transaction.reference || 'No description',
+                          amount: parseFloat(transaction.amount),
+                          counterparty_name: txType === 'debit' 
+                            ? (transaction.recipient?.name || transaction.recipient_name || 'Unknown')
+                            : (transaction.sender?.name || transaction.sender_name || 'Unknown'),
+                          counterparty_address: txType === 'debit'
+                            ? (transaction.recipient?.address || transaction.recipient_address || '')
+                            : (transaction.sender?.address || transaction.sender_address || ''),
+                        }
+                      })
+                    : [];
+                } else {
+                  this.error = result.error || "Failed to load transactions";
+                }
 
             } catch (err) {
                 this.error = "Failed to load transactions";
@@ -93,16 +109,55 @@ export const useTransactionStore = defineStore('transaction', {
                         sender_balance: data.wallet_balance ?? null,
                     };
                 } else {
-                    this.error = data.message || "Unable to send money";
-                    return null;
+                    // Handle specific error cases
+                    const errorMessage = this.parseErrorMessage(data, res.status)
+                    this.error = errorMessage
+                    return {
+                        status: 'error',
+                        message: errorMessage,
+                        data: data
+                    }
                 }
             } catch (err) {
                 console.error(err);
-                this.error = "Network error. Try again.";
-                return null;
+                const networkError = "Network error. Please check your connection and try again.";
+                this.error = networkError;
+                return {
+                    status: 'error',
+                    message: networkError
+                };
             } finally {
                 this.loading = false;
             }
+        },
+
+        parseErrorMessage(data, statusCode) {
+            // Handle different error scenarios
+            if (statusCode === 401) {
+                return "Your session has expired. Please log in again.";
+            }
+            if (statusCode === 403) {
+                return "You don't have permission to perform this action.";
+            }
+            if (statusCode === 400) {
+                if (data.errors?.amount) {
+                    return data.errors.amount;
+                }
+                if (data.errors?.recipient) {
+                    return data.errors.recipient;
+                }
+            }
+            if (statusCode === 422) {
+                return data.message || "Invalid transaction data. Please check and try again.";
+            }
+            if (statusCode === 429) {
+                return "Too many requests. Please wait a moment and try again.";
+            }
+            if (statusCode === 500) {
+                return "Server error. Please try again later.";
+            }
+            
+            return data.message || "Unable to send money. Please try again.";
         },
 
         async resolveRecipient(input) {

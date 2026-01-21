@@ -8,22 +8,22 @@
 
         <q-card-section>
           <!-- Success Message -->
-          <q-banner v-if="successMessage" class="bg-green-2 text-green-9 q-mb-md rounded">
+          <q-banner v-if="successMessage" class="bg-green-2 text-green-9 q-mb-md rounded q-pa-md">
             <template v-slot:avatar>
-              <q-icon name="check_circle" />
+              <q-icon name="check_circle" color="green-9" size="lg" />
             </template>
-            {{ successMessage }}
+            <div class="text-weight-bold text-body1">{{ successMessage }}</div>
             <template v-slot:action>
               <q-btn flat size="sm" @click="successMessage = ''" label="Dismiss" />
             </template>
           </q-banner>
 
           <!-- Error Messages -->
-          <q-banner v-if="errorMessage" class="bg-red-2 text-red-9 q-mb-md rounded">
+          <q-banner v-if="errorMessage" class="bg-red-2 text-red-9 q-mb-md rounded q-pa-md">
             <template v-slot:avatar>
-              <q-icon name="error" />
+              <q-icon name="error" color="red-9" size="lg" />
             </template>
-            {{ errorMessage }}
+            <div class="text-weight-bold text-body1">{{ errorMessage }}</div>
             <template v-slot:action>
               <q-btn flat size="sm" @click="errorMessage = ''" label="Dismiss" />
             </template>
@@ -56,7 +56,7 @@
                   <q-card-section>
                     <div class="text-subtitle2 text-weight-bold">{{ transactionStore.recipientPreview.name }}</div>
                     <div class="text-caption text-grey">{{ transactionStore.recipientPreview.address }}</div>
-                    <q-linear-progress value="1" color="blue" class="q-mt-sm" />
+                    <q-linear-progress :value="1" color="blue" class="q-mt-sm" />
                   </q-card-section>
                 </q-card>
               </div>
@@ -209,11 +209,11 @@ const validateForm = () => {
 
 const handleSubmit = async () => {
   if (!validateForm()) {
+    setErrorMessage('Please fix the errors in the form')
     return
   }
 
-  errorMessage.value = ''
-  successMessage.value = ''
+  clearMessages()
 
   try {
     const payload = {
@@ -224,21 +224,83 @@ const handleSubmit = async () => {
 
     const result = await transactionStore.sendMoney(payload)
 
-    if (result && result.status === 'success') {
-      successMessage.value = result.message || 'Money sent successfully!'
-      resetForm()
+    // Check if transaction was successful
+    if (result && (result.status === 'success' || result.transaction || (result.sender_balance !== undefined && !transactionStore.error))) {
+      const recipientName = transactionStore.recipientPreview?.name || 'recipient'
+      const successMsg = `✓ Money sent successfully!\n${formatCurrency(formData.amount)} ${authStore.getWalletCurrency} to ${recipientName}`
+      successMessage.value = successMsg
       
-      // Refresh wallet balance after 2 seconds
+      // Refresh wallet balance after 2 seconds, then reset form after 4 seconds
       setTimeout(() => {
         authStore.fetchWallet()
       }, 2000)
+      
+      setTimeout(() => {
+        resetForm()
+      }, 4000)
     } else {
-      errorMessage.value = transactionStore.error || 'Failed to send money'
+      // Error case
+      const errorMsg = transactionStore.error || result?.message || 'Failed to send money'
+      handleError(errorMsg)
     }
   } catch (err) {
-    errorMessage.value = err.message || 'An error occurred while sending money'
     console.error('Send error:', err)
+    handleError(err.message || 'An error occurred while sending money')
   }
+}
+
+const clearMessages = () => {
+  errorMessage.value = ''
+  successMessage.value = ''
+}
+
+const setSuccessMessage = (message) => {
+  successMessage.value = message
+  // Auto-dismiss after 6 seconds
+  setTimeout(() => {
+    if (successMessage.value === message) {
+      successMessage.value = ''
+    }
+  }, 6000)
+}
+
+const setErrorMessage = (message) => {
+  errorMessage.value = message
+  // Auto-dismiss after 8 seconds
+  setTimeout(() => {
+    if (errorMessage.value === message) {
+      errorMessage.value = ''
+    }
+  }, 8000)
+}
+
+const showNotification = (type, message, caption = '') => {
+  // Notification handled via banner messages
+}
+
+const handleError = (errorMsg) => {
+  // Map common errors to user-friendly messages
+  const errorMapping = {
+    'insufficient': 'Insufficient balance to complete this transaction',
+    'recipient': 'Invalid recipient address or recipient not found',
+    'network': 'Network error. Please check your connection and try again',
+    'timeout': 'Request timed out. Please try again',
+    'validation': 'Please check your input and try again',
+    'duplicate': 'This transaction was already sent',
+    'locked': 'Your account is locked. Please contact support',
+    'amount': 'Invalid amount. Must be greater than 0'
+  }
+
+  // Find matching error and use user-friendly message
+  let displayMessage = errorMsg
+  for (const [key, message] of Object.entries(errorMapping)) {
+    if (errorMsg.toLowerCase().includes(key)) {
+      displayMessage = message
+      break
+    }
+  }
+
+  setErrorMessage(`✗ Transaction Failed\n${displayMessage}`)
 }
 
 const resetForm = () => {
@@ -256,5 +318,17 @@ const resetForm = () => {
 <style scoped>
 .q-card {
   box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+}
+
+.q-banner {
+  border-left: 4px solid;
+}
+
+.q-banner.bg-green-2 {
+  border-left-color: #4caf50;
+}
+
+.q-banner.bg-red-2 {
+  border-left-color: #f44336;
 }
 </style>

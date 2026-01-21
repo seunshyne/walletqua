@@ -1,5 +1,5 @@
 <template>
-  <q-page class="flex flex-center bg-primary text-white">
+  <q-page class="home-page flex flex-center text-white">
     <div class="column items-center text-center q-pa-xl">
 
       <!-- Welcome text -->
@@ -106,5 +106,23 @@ onMounted(() => {
 .slide-left-enter-from {
   opacity: 0;
   transform: translateX(30px);
+}
+
+/* Home Page Overlay */
+.home-page::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.home-page > div {
+  position: relative;
+  z-index: 2;
 }
 </style>
