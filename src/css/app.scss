@@ -1,1 +1,29 @@
 // app global css in SCSS form
+
+html,
+body,
+#app {
+  background-image: url('/images/wallet-bg.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-color: #1a1a1a;
+}
+
+.q-page {
+  background-image: url('/images/wallet-bg.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+}
+
+.auth-page {
+  background-image: url('/images/wallet-bg.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-color: #1a1a1a;
+}

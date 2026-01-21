@@ -3,6 +3,8 @@
 
 import { defineConfig } from '#q-app/wrappers'
 
+
+
 export default defineConfig((/* ctx */) => {
   return {
     // https://v2.quasar.dev/quasar-cli-vite/prefetch-feature
@@ -12,6 +14,7 @@ export default defineConfig((/* ctx */) => {
     // --> boot files are part of "main.js"
     // https://v2.quasar.dev/quasar-cli-vite/boot-files
     boot: [
+      'auth'
     ],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#css
@@ -67,7 +70,15 @@ export default defineConfig((/* ctx */) => {
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#devserver
     devServer: {
       // https: true,
-      open: true // opens browser window automatically
+      open: true, // opens browser window automatically
+      proxy: {
+        // proxy all requests starting with /api to jsonplaceholder
+        '/api': {
+          target: 'http://localhost:8000',
+          changeOrigin: true,
+          secure: false,
+        }
+      }
     },
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#framework
