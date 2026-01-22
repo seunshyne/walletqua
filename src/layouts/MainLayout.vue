@@ -31,9 +31,6 @@
           <q-btn flat label="Register" to="register" />
         </template>
 
-       
-
-        <div>Quasar v{{ $q.version }}</div>
       </q-toolbar>
     </q-header>
 
