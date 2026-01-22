@@ -43,7 +43,7 @@ export default defineConfig((/* ctx */) => {
         node: 'node20'
       },
 
-      vueRouterMode: 'hash', // available values: 'hash', 'history'
+      vueRouterMode: 'history', // available values: 'hash', 'history'
       
       // vueRouterBase,
       // vueDevtools,
@@ -53,13 +53,14 @@ export default defineConfig((/* ctx */) => {
 
       publicPath: '/',
       // analyze: true,
-      // env: {},
+      env: {
+        API_URL: process.env.VITE_API_URL
+      },
       // rawDefine: {}
       // ignorePublicFolder: true,
       // minify: false,
       // polyfillModulePreload: true,
-      // distDir
-
+      distDir: 'dist/spa',
       // extendViteConf (viteConf) {},
       // viteVuePluginOptions: {},
       
