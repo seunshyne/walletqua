@@ -10,6 +10,9 @@
     "test": "echo \"No test specified\" && exit 0",
     "dev": "quasar dev",
     "build": "quasar build",
+    "build:spa": "quasar build -m spa",
+    "lint": "eslint --ext .js,.vue ./",
+    "vercel-build": "quasar build",
     "postinstall": "quasar prepare"
   },
   "dependencies": {
