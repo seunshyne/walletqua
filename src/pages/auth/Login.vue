@@ -1,6 +1,6 @@
 <template>
   <q-page
-    class="window-height window-width row justify-center items-center auth-page login-responsive"
+    class="window-height window-width row justify-center items-center auth-page login-responsive login-moveup"
   >
     <div class="column login-col-responsive">
       <div class="row">
@@ -163,6 +163,10 @@
   .login-section-responsive {
     padding: 8px !important;
   }
+}
+/* Move the login form up */
+.login-moveup {
+  margin-top: -48px;
 }
 </style>
 

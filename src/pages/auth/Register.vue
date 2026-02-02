@@ -1,6 +1,6 @@
 <template>
   <q-page
-    class="window-height window-width row justify-center items-center auth-page register-responsive"
+    class="window-height window-width row justify-center items-center auth-page register-responsive register-moveup"
   >
     <div class="column register-col-responsive">
       <div class="row">
@@ -224,6 +224,10 @@
   .register-section-responsive {
     padding: 8px !important;
   }
+}
+/* Move the register form up */
+.register-moveup {
+  margin-top: -48px;
 }
 </style>
 
