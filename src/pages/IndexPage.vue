@@ -15,7 +15,7 @@
           v-if="show"
           class="text-h3 text-weight-bold q-mb-md"
         >
-          Wallet App
+          Prime Wallet
         </h1>
       </transition>
 

@@ -1,12 +1,12 @@
 <template>
   <q-page
-    class="window-height window-width row justify-center items-center auth-page"
+    class="window-height window-width row justify-center items-center auth-page register-responsive"
   >
-    <div class="column q-pa-lg">
+    <div class="column register-col-responsive">
       <div class="row">
-        <q-card square class="shadow-24" style="width: 500px; height: 650px">
+        <q-card square class="shadow-24 register-card-responsive">
           <q-card-section class="bg-primary">
-            <h4 class="text-h5 text-white q-my-md">Registration</h4>
+            <h4 class="register-title-responsive text-white q-my-md">Registration</h4>
             <div
               class="absolute-bottom-right q-pr-md"
               style="transform: translateY(50%)"
@@ -31,7 +31,7 @@
           <q-card-section>
             <q-form
               @submit.prevent="handleSubmit"
-              class="q-px-sm q-pt-xl q-pb-lg"
+              class="register-form-responsive"
             >
               <q-input
                 square
@@ -123,7 +123,7 @@
                   <q-icon name="lock" />
                 </template>
               </q-input>
-              <q-card-actions class="q-px-lg">
+              <q-card-actions class="register-actions-responsive">
                 <q-btn
                   unelevated
                   size="lg"
@@ -136,7 +136,7 @@
             </q-form>
           </q-card-section>
 
-          <q-card-section class="text-center q-pa-sm">
+          <q-card-section class="text-center register-section-responsive">
             <p class="text-grey-6">
               <router-link to="/login">Return to login</router-link>
             </p>
@@ -145,7 +145,87 @@
       </div>
     </div>
   </q-page>
-</template>
+ </template>
+
+<style scoped>
+.register-col-responsive {
+  padding: 32px;
+}
+.register-card-responsive {
+  width: 500px;
+  height: 650px;
+}
+.register-title-responsive {
+  font-size: 2rem;
+}
+.register-form-responsive {
+  padding-left: 16px;
+  padding-right: 16px;
+  padding-top: 48px;
+  padding-bottom: 32px;
+}
+.register-actions-responsive {
+  padding-left: 32px;
+  padding-right: 32px;
+}
+.register-section-responsive {
+  padding: 16px;
+}
+
+@media (max-width: 599px) {
+  .register-col-responsive {
+    padding: 8px !important;
+  }
+  .register-card-responsive {
+    width: 100% !important;
+    min-width: 0;
+    height: auto !important;
+  }
+  .register-title-responsive {
+    font-size: 1.3rem !important;
+  }
+  .register-form-responsive {
+    padding-left: 4px !important;
+    padding-right: 4px !important;
+    padding-top: 16px !important;
+    padding-bottom: 8px !important;
+  }
+  .register-actions-responsive {
+    padding-left: 4px !important;
+    padding-right: 4px !important;
+  }
+  .register-section-responsive {
+    padding: 4px !important;
+  }
+}
+
+@media (min-width: 600px) and (max-width: 1023px) {
+  .register-col-responsive {
+    padding: 20px !important;
+  }
+  .register-card-responsive {
+    width: 90% !important;
+    min-width: 0;
+    height: auto !important;
+  }
+  .register-title-responsive {
+    font-size: 1.7rem !important;
+  }
+  .register-form-responsive {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+    padding-top: 32px !important;
+    padding-bottom: 16px !important;
+  }
+  .register-actions-responsive {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+  .register-section-responsive {
+    padding: 8px !important;
+  }
+}
+</style>
 
 <script setup>
 import { useAuthStore } from "src/stores/auth";

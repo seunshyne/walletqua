@@ -11,7 +11,14 @@
           @click="toggleLeftDrawer"
         />
 
-        <q-toolbar-title> <router-link to="/" class="nav-link">Prime Wallet</router-link> </q-toolbar-title>
+        <q-toolbar-title>
+          <router-link to="/" class="nav-link">
+            <template v-if="$q.screen.gt.sm">Prime Wallet</template>
+            <template v-else>
+              <img src="/images/logo.jpg" alt="Logo" style="height:32px; vertical-align:middle; border-radius:50%; object-fit:cover;" />
+            </template>
+          </router-link>
+        </q-toolbar-title>
         
          <!-- LOGGED IN -->
         <template v-if="isAuthenticated">
@@ -151,16 +158,26 @@
 </template>
 
 <script setup>
-import { ref, watch, computed } from "vue";
+import { ref, watch, computed, onMounted, getCurrentInstance } from "vue";
 import { useAuthStore } from "src/stores/auth";
 import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router' 
 
 const router = useRouter();
 const authStore = useAuthStore();
+const { proxy } = getCurrentInstance();
 
 const { user, isAuthenticated } = storeToRefs(authStore);
 const walletAddress = computed(() => authStore.getWalletAddress);
+
+const leftDrawerOpen = ref(false);
+
+onMounted(() => {
+  // Ensure drawer is closed on desktop at mount
+  if (proxy.$q && proxy.$q.screen.gt.sm) {
+    leftDrawerOpen.value = false;
+  }
+});
 
 watch(isAuthenticated, (Val) => {
   if (Val) {
@@ -172,8 +189,6 @@ const logout = async () => {
   await authStore.logout();
   await router.push({ path: '/' });
 };
-
-const leftDrawerOpen = ref(false);
 
 function toggleLeftDrawer() {
   leftDrawerOpen.value = !leftDrawerOpen.value;
