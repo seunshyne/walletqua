@@ -3,7 +3,7 @@
  * Handles all HTTP requests with automatic token injection and error handling
  */
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://primewallet.duckdns.org'
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api'
 
 class APIClient {
   constructor(baseURL = API_BASE_URL) {
@@ -38,20 +38,6 @@ class APIClient {
   }
 
   /**
-   * Get CSRF cookie from Laravel Sanctum (if needed for cookie-based auth)
-   */
-  async getCsrfToken() {
-    try {
-      await fetch(`${this.baseURL}/sanctum/csrf-cookie`, {
-        method: 'GET',
-        credentials: 'include',
-      })
-    } catch (error) {
-      console.warn('Failed to fetch CSRF token:', error)
-    }
-  }
-
-  /**
    * Make HTTP request
    */
   async request(endpoint, options = {}) {
@@ -60,7 +46,6 @@ class APIClient {
       body = null,
       headers = {},
       includeAuth = true,
-      credentials = 'include', // Important for CORS
       ...otherOptions
     } = options
 
@@ -68,7 +53,6 @@ class APIClient {
     const config = {
       method,
       headers: { ...this.getHeaders(includeAuth), ...headers },
-      credentials, // Include credentials for CORS
       ...otherOptions,
     }
 
@@ -112,15 +96,9 @@ class APIClient {
    */
   handleError(error) {
     console.error('API Error:', error)
-    
-    // Check if it's a network error
-    if (!error.status) {
-      const networkError = new Error('Network error - please check your connection')
-      networkError.originalError = error
-      throw networkError
-    }
-    
-    throw error
+    const apiError = new Error(error.message || 'Network error')
+    apiError.originalError = error
+    throw apiError
   }
 
   // Convenience methods

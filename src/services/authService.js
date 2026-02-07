@@ -6,11 +6,11 @@
 import apiClient from '../api/client'
 
 const AUTH_ENDPOINTS = {
-  LOGIN: '/api/login',       
-  REGISTER: '/api/register',  
-  LOGOUT: '/api/logout',      
-  GET_USER: '/api/user',      
-  RESEND_VERIFICATION: '/api/email/resend',
+  LOGIN: '/auth/login',
+  REGISTER: '/auth/register',
+  LOGOUT: '/auth/logout',
+  GET_USER: '/user',
+  RESEND_VERIFICATION: '/email/resend',
 }
 
 export const authService = {
@@ -19,9 +19,6 @@ export const authService = {
    */
   async login(email, password) {
     try {
-      // Get CSRF token first (optional, depends on your Laravel setup)
-      // await apiClient.getCsrfToken()
-
       const response = await apiClient.post(AUTH_ENDPOINTS.LOGIN, {
         email,
         password,
@@ -44,7 +41,7 @@ export const authService = {
       return {
         success: false,
         error: error.data?.errors || error.data?.error || { general: error.message },
-        message: error.data?.message || error.message || 'Login failed',
+        message: error.data?.message || '',
         status: error.status,
       }
     }
@@ -71,7 +68,7 @@ export const authService = {
       return {
         success: false,
         error: error.data?.errors || error.data?.error || { general: error.message },
-        message: error.data?.message || error.message || 'Registration failed',
+        message: error.data?.message || '',
       }
     }
   },
@@ -126,7 +123,7 @@ export const authService = {
       return {
         success: false,
         error: error.message,
-        message: error.data?.message || error.message || 'Failed to send verification email',
+        message: error.data?.message || '',
       }
     }
   },
