@@ -3,7 +3,7 @@
  * Handles all HTTP requests with automatic token injection and error handling
  */
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || '/api'
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://primewallet.duckdns.org'
 
 class APIClient {
   constructor(baseURL = API_BASE_URL) {
@@ -38,6 +38,24 @@ class APIClient {
   }
 
   /**
+   * Get CSRF cookie from Laravel Sanctum
+   */
+  async getCsrfCookie() {
+    try {
+      await fetch(`${this.baseURL}/sanctum/csrf-cookie`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Accept': 'application/json',
+        }
+      })
+      console.log('CSRF cookie obtained')
+    } catch (error) {
+      console.warn('Failed to get CSRF cookie:', error)
+    }
+  }
+
+  /**
    * Make HTTP request
    */
   async request(endpoint, options = {}) {
@@ -46,13 +64,23 @@ class APIClient {
       body = null,
       headers = {},
       includeAuth = true,
+      skipCsrf = false,
       ...otherOptions
     } = options
 
+    // Get CSRF cookie before state-changing requests
+    if (!skipCsrf && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method.toUpperCase())) {
+      await this.getCsrfCookie()
+    }
+
     const url = `${this.baseURL}${endpoint}`
+    
+    console.log('Making request to:', url) // Debug log
+    
     const config = {
       method,
       headers: { ...this.getHeaders(includeAuth), ...headers },
+      credentials: 'include', // Important for CSRF cookies
       ...otherOptions,
     }
 
@@ -81,6 +109,13 @@ class APIClient {
       const error = new Error(data.message || `HTTP ${response.status}`)
       error.status = response.status
       error.data = data
+      
+      console.error('API Response Error:', {
+        status: response.status,
+        url: response.url,
+        data
+      })
+      
       throw error
     }
 
