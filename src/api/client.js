@@ -142,6 +142,7 @@ class APIClient {
   }
 
   post(endpoint, body, options = {}) {
+    console.log('POST request to:', endpoint, 'with body:', body) // Debug log
     return this.request(endpoint, { ...options, method: 'POST', body })
   }
 
