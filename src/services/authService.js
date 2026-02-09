@@ -6,12 +6,12 @@
 import apiClient from '../api/client'
 
 const AUTH_ENDPOINTS = {
-  LOGIN: '/api/login',
-  REGISTER: '/api/register',
-  LOGOUT: '/api/logout',
+  LOGIN: '/api/auth/login',
+  REGISTER: '/api/auth/register',
+  LOGOUT: '/api/auth/logout',
   GET_USER: '/api/user',
   RESEND_VERIFICATION: '/api/email/resend',
-}
+};
 
 export const authService = {
   /**
