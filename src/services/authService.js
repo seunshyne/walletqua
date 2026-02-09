@@ -19,6 +19,7 @@ export const authService = {
    */
   async login(email, password) {
     try {
+      console.log('Attempting login with email:', email) // Debug log
       const response = await apiClient.post(AUTH_ENDPOINTS.LOGIN, {
         email,
         password,

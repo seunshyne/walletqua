@@ -196,6 +196,7 @@ const formData = reactive({
 
 const handleSubmit = async () => {
   if (!authStore) return
+  console.log('Submitting login form with:', formData)
   const result = await authStore.authenticate('login', formData, router)
   if (result && result.success && result.type === 'login') {
     // Redirect to dashboard after successful login
