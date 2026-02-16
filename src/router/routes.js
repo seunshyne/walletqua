@@ -45,12 +45,6 @@ const routes = [
         component: () => import('pages/auth/VerifyEmail.vue'),
         meta: { guestOnly: true }
       },
-      { 
-        path: 'verify-email/:id/:hash', 
-        name: 'email-verification-handler',
-        component: () => import('pages/auth/EmailVerificationHandler.vue'),
-        meta: { guestOnly: true }
-      },
     ]
   },
 
