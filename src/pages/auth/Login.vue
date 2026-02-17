@@ -173,9 +173,10 @@
 <script setup>
 import { useAuthStore } from "src/stores/auth"
 import { onMounted, reactive, computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 
 const router = useRouter()
+const route = useRoute()
 
 let authStore = null
 try {
@@ -213,12 +214,25 @@ const handleSubmit = async () => {
 
 onMounted(() => {
   if (!authStore) return
+
   //check if already authenticated
+
   if (isAuthenticated.value) {
     router.replace({ name: 'dashboard' })
     return
   }
   authStore.errors = {}
-  authStore.message = ''
+  
+  // Check for verification status in URL
+  const verified = route.query.verified
+  if (verified === 'success') {
+    authStore.message = 'Email verified successfully! You can now login.'
+  } else if (verified === 'already') {
+    authStore.message = 'Email already verified. Please login.'
+  } else if (verified === 'invalid') {
+    authStore.errors = { general: 'Invalid or expired verification link. Please request a new one.' }
+  } else if (verified === 'error') {
+    authStore.errors = { general: 'Verification failed. Please try again.' }
+  }
 })
 </script>
