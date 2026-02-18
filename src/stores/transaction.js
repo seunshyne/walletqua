@@ -88,7 +88,7 @@ export const useTransactionStore = defineStore('transaction', {
             }
 
             try {
-                const API_URL = import.meta.env.VITE_API_URL || process.env.VUE_APP_API_URL
+                const API_URL = import.meta.env.VITE_API_URL || 'https://primewallet.duckdns.org'
 
                 const res = await fetch(`${API_URL}/api/transactions/transfer`, {
                     method: "POST",
@@ -177,7 +177,7 @@ export const useTransactionStore = defineStore('transaction', {
             this.recipientPreview = null;
 
             try {
-                const API_URL = import.meta.env.VITE_API_URL || process.env.VUE_APP_API_URL
+                const API_URL = import.meta.env.VITE_API_URL || 'https://primewallet.duckdns.org'
 
                 const res = await fetch(`${API_URL}/api/resolve-recipient`, {
                     method: 'POST',
