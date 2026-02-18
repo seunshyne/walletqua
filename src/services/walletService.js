@@ -6,12 +6,12 @@
 import apiClient from '../api/client'
 
 const WALLET_ENDPOINTS = {
-  GET_WALLETS: '/api/wallets',
-  GET_WALLET: (id) => `/api/wallets/${id}`,
-  GET_BALANCE: (id) => `/api/wallets/${id}/balance`,
-  SEND: '/api/transactions/transfer',
-  RECEIVE: '/api/transactions/receive',
-  GET_TRANSACTIONS: '/api/transactions',
+  GET_WALLETS: '/wallets',
+  GET_WALLET: (id) => `/wallets/${id}`,
+  GET_BALANCE: (id) => `/wallets/${id}/balance`,
+  SEND: '/transactions/transfer',
+  RECEIVE: '/transactions/receive',
+  GET_TRANSACTIONS: '/transactions',
 }
 
 export const walletService = {
