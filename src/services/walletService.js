@@ -9,7 +9,7 @@ const WALLET_ENDPOINTS = {
   GET_WALLETS: '/api/wallets',
   GET_WALLET: (id) => `/api/wallets/${id}`,
   GET_BALANCE: (id) => `/api/wallets/${id}/balance`,
-  SEND: '/api/transactions/send',
+  SEND: '/api/transactions/transfer',
   RECEIVE: '/api/transactions/receive',
   GET_TRANSACTIONS: '/api/transactions',
 }
