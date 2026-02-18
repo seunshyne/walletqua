@@ -7,7 +7,7 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://primewallet.duckdn
 
 class APIClient {
   constructor(baseURL = API_BASE_URL) {
-    this.baseURL = baseURL
+    this.baseURL = `${baseURL}/api`
     this.defaultHeaders = {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
