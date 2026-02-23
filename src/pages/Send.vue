@@ -42,7 +42,7 @@
                 hint="Enter recipient's wallet address (WAL...) or email"
                 :error="!!errors.recipient"
                 :error-message="errors.recipient"
-                @blur="resolveRecipient"
+                @blur="handleRecipientBlur"
                 :loading="transactionStore.resolving"
               >
                 <template v-slot:prepend>
@@ -141,7 +141,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed, watch, onBeforeUnmount } from 'vue'
 import { useAuthStore } from 'src/stores/auth'
 import { useTransactionStore } from 'src/stores/transaction'
 import { formatCurrency } from 'src/utils/index'
@@ -162,6 +162,8 @@ const errors = reactive({
   recipient: '',
   amount: ''
 })
+const RECIPIENT_DEBOUNCE_MS = 500
+const recipientDebounceTimer = ref(null)
 
 const isFormValid = computed(() => {
   return (
@@ -181,8 +183,47 @@ const resolveRecipient = async () => {
   }
 
   errors.recipient = ''
-  await transactionStore.resolveRecipient(formData.recipient)
+  await transactionStore.resolveRecipient(formData.recipient.trim())
 }
+
+const handleRecipientBlur = async () => {
+  if (recipientDebounceTimer.value) {
+    clearTimeout(recipientDebounceTimer.value)
+    recipientDebounceTimer.value = null
+  }
+  await resolveRecipient()
+}
+
+watch(
+  () => formData.recipient,
+  (value) => {
+    if (recipientDebounceTimer.value) {
+      clearTimeout(recipientDebounceTimer.value)
+      recipientDebounceTimer.value = null
+    }
+
+    const recipient = value.trim()
+    if (!recipient) {
+      transactionStore.recipientError = null
+      transactionStore.recipientPreview = null
+      errors.recipient = ''
+      return
+    }
+
+    errors.recipient = ''
+    recipientDebounceTimer.value = setTimeout(() => {
+      resolveRecipient()
+      recipientDebounceTimer.value = null
+    }, RECIPIENT_DEBOUNCE_MS)
+  }
+)
+
+onBeforeUnmount(() => {
+  if (recipientDebounceTimer.value) {
+    clearTimeout(recipientDebounceTimer.value)
+    recipientDebounceTimer.value = null
+  }
+})
 
 const validateForm = () => {
   errors.recipient = ''
@@ -216,10 +257,15 @@ const handleSubmit = async () => {
   clearMessages()
 
   try {
+    const resolvedRecipient = transactionStore.recipientPreview?.address || formData.recipient.trim()
     const payload = {
-      recipient: formData.recipient,
+      recipient: resolvedRecipient,
+      recipientAddress: resolvedRecipient,
+      recipient_address: resolvedRecipient,
       amount: parseFloat(formData.amount),
-      description: formData.description || ''
+      description: formData.description || '',
+      note: formData.description || '',
+      memo: formData.description || ''
     }
 
     const result = await transactionStore.sendMoney(payload)

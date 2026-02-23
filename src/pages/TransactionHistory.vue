@@ -3,7 +3,7 @@
     <!-- Header -->
     <div class="row items-center justify-between q-mb-lg">
       <div>
-        <h1 class="text-h4 text-weight-bold q-my-none">Transaction History</h1>
+        <h1 class="text-h4 text-weight-bold q-my-none history-title">Transaction History</h1>
         <p class="text-subtitle2 text-grey q-my-none">View all your transactions</p>
       </div>
       <q-btn
@@ -338,5 +338,9 @@ const expandTransaction = (transaction) => {
 
 .break-word {
   word-break: break-all;
+}
+
+.history-title {
+  color: #ffffff;
 }
 </style>

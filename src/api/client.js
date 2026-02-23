@@ -42,7 +42,8 @@ class APIClient {
    */
   async getCsrfCookie() {
     try {
-      await fetch(`${this.baseURL}/sanctum/csrf-cookie`, {
+      const csrfUrl = `${new URL(this.baseURL).origin}/sanctum/csrf-cookie`
+      await fetch(csrfUrl, {
         method: 'GET',
         credentials: 'include',
         headers: {

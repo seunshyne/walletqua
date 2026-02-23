@@ -74,7 +74,10 @@ export const walletService = {
    */
   async sendMoney(data) {
     try {
-      const response = await apiClient.post(WALLET_ENDPOINTS.SEND, data)
+      const idempotencyKey = data?.idempotency_key || data?.client_idempotency_key
+      const response = await apiClient.post(WALLET_ENDPOINTS.SEND, data, {
+        headers: idempotencyKey ? { 'X-Idempotency-Key': idempotencyKey } : {},
+      })
       return {
         success: true,
         transaction: response.data.transaction || response.data,
@@ -83,14 +86,26 @@ export const walletService = {
     } catch (error) {
       // Extract detailed error information
       const errorData = error.response?.data || error.data || {}
-      const errorMessage = errorData.message || error.message || 'Transaction failed'
+      const normalizedErrorData = typeof errorData === 'string' ? { raw: errorData } : errorData
+      const errorMessage =
+        normalizedErrorData.message ||
+        normalizedErrorData.error ||
+        error.message ||
+        'Transaction failed'
       const errors = errorData.errors || {}
+
+      console.error('Transfer request failed', {
+        status: error.response?.status || error.status,
+        message: errorMessage,
+        data: normalizedErrorData,
+      })
 
       return {
         success: false,
         error: errors,
         message: errorMessage,
-        statusCode: error.response?.status || error.status
+        statusCode: error.response?.status || error.status,
+        rawError: normalizedErrorData,
       }
     }
   },

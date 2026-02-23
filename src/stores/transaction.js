@@ -82,47 +82,50 @@ export const useTransactionStore = defineStore('transaction', {
             this.loading = true;
             this.error = "";
 
-            // FIXED — correct key name
-            if (!payload.client_idempotency_key) {
-                payload.client_idempotency_key = this.generateIdempotencyKey();
+            const requestPayload = { ...payload };
+
+            // Ensure idempotency key is always present.
+            if (!requestPayload.client_idempotency_key) {
+                requestPayload.client_idempotency_key = this.generateIdempotencyKey();
+            }
+            if (!requestPayload.idempotency_key) {
+                requestPayload.idempotency_key = requestPayload.client_idempotency_key;
+            }
+            if (!requestPayload.reference) {
+                requestPayload.reference = requestPayload.client_idempotency_key;
             }
 
             try {
-                const API_URL = import.meta.env.VITE_API_URL || 'https://primewallet.duckdns.org'
+                const result = await walletService.sendMoney(requestPayload);
 
-                const res = await fetch(`${API_URL}/api/transactions/transfer`, {
-                    method: "POST",
-                    credentials: 'include',
+                if (result.success) {
+                    const responseData = result.transaction || {};
+                    const senderTx = responseData.sender_transaction || responseData.transaction || responseData;
 
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Accept": "application/json",
-                        Authorization: `Bearer ${localStorage.getItem("token")}`,
-                    },
-                    body: JSON.stringify(payload),
-                });
-
-                const data = await res.json();
-
-                if (res.ok && data.status === "success") {
-                    if (data.sender_transaction) {
-                        this.transactions.unshift(data.sender_transaction);
+                    if (senderTx && typeof senderTx === "object") {
+                        this.transactions.unshift(senderTx);
                     }
 
                     return {
-                        ...data,
-                        sender_balance: data.wallet_balance ?? null,
+                        status: "success",
+                        ...responseData,
+                        sender_balance: responseData.wallet_balance ?? null,
+                        message: result.message,
                     };
-                } else {
-                    // Handle specific error cases
-                    const errorMessage = this.parseErrorMessage(data, res.status)
-                    this.error = errorMessage
-                    return {
-                        status: 'error',
-                        message: errorMessage,
-                        data: data
-                    }
                 }
+
+                const errorMessage = this.parseErrorMessage(
+                    { message: result.message, errors: result.error, rawError: result.rawError },
+                    result.statusCode
+                );
+                this.error = errorMessage;
+                return {
+                    status: "error",
+                    message: errorMessage,
+                    data: result.error,
+                    rawError: result.rawError,
+                    statusCode: result.statusCode,
+                };
             } catch (err) {
                 console.error(err);
                 const networkError = "Network error. Please check your connection and try again.";
@@ -159,7 +162,10 @@ export const useTransactionStore = defineStore('transaction', {
                 return "Too many requests. Please wait a moment and try again.";
             }
             if (statusCode === 500) {
-                return "Server error. Please try again later.";
+                if (typeof data.rawError?.raw === "string") {
+                    return data.rawError.raw;
+                }
+                return data.message || "Server error. Please try again later.";
             }
 
             return data.message || "Unable to send money. Please try again.";
@@ -219,3 +225,4 @@ export const useTransactionStore = defineStore('transaction', {
         },
     }
 })
+
