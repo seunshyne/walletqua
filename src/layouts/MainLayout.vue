@@ -12,7 +12,7 @@
         />
 
         <q-toolbar-title>
-          <router-link to="/" class="nav-link">
+          <router-link :to="logoDestination" class="nav-link">
             <template v-if="$q.screen.gt.sm">Prime Wallet</template>
             <template v-else>
               <img src="/images/logo.jpg" alt="Logo" style="height:32px; vertical-align:middle; border-radius:50%; object-fit:cover;" />
@@ -169,6 +169,7 @@ const { proxy } = getCurrentInstance();
 
 const { user, isAuthenticated } = storeToRefs(authStore);
 const walletAddress = computed(() => authStore.getWalletAddress);
+const logoDestination = computed(() => (isAuthenticated.value ? { name: 'dashboard' } : { path: '/' }));
 
 const leftDrawerOpen = ref(false);
 
