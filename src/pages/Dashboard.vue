@@ -21,22 +21,55 @@
     <q-row class="q-gutter-md q-mt-md" align="center" justify="center">
       <q-col cols="12" sm="10" md="8" lg="6" xl="5">
         <q-table
-          :rows="transactions"
+          :rows="recentTransactions"
           :columns="columns"
           row-key="id"
           title="Recent Transactions"
           class="dashboard-table-responsive"
-        />
+          :loading="transactionStore.loading"
+          :rows-per-page-options="[5]"
+          :pagination="{ rowsPerPage: 5 }"
+          flat
+        >
+          <template v-slot:body-cell-counterparty="props">
+            <q-td :props="props">
+              {{
+                props.row.type === 'debit'
+                  ? `Sent to ${props.row.counterparty_name || 'Unknown'}`
+                  : `Received from ${props.row.counterparty_name || 'Unknown'}`
+              }}
+            </q-td>
+          </template>
+
+          <template v-slot:body-cell-status="props">
+            <q-td :props="props">
+              <q-badge
+                :label="props.row.status || 'completed'"
+                :color="getStatusColor(props.row.status || 'completed')"
+                text-color="white"
+              />
+            </q-td>
+          </template>
+
+          <template v-slot:body-cell-amount="props">
+            <q-td :props="props">
+              <span :class="props.row.type === 'debit' ? 'text-negative' : 'text-positive'">
+                {{ props.row.type === 'debit' ? '-' : '+' }}{{ formatCurrency(props.row.amount) }}
+              </span>
+            </q-td>
+          </template>
+        </q-table>
       </q-col>
     </q-row>
   </q-page>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from 'src/stores/auth'
 import { useTransactionStore } from 'src/stores/transaction'
+import { formatCurrency } from 'src/utils/index'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -79,17 +112,43 @@ onMounted(async () => {
 //   }, frameRate)
 // }
 
-const transactions = ref([
-  { id: 1, type: 'Credit', amount: 500, date: '2026-01-09', description: 'Salary' },
-  { id: 2, type: 'Debit', amount: 200, date: '2026-01-08', description: 'Groceries' },
-]);
+const recentTransactions = computed(() => {
+  const transactions = Array.isArray(transactionStore.transactions) ? transactionStore.transactions : []
+  return [...transactions]
+    .sort((a, b) => new Date(b.date || b.created_at || 0) - new Date(a.date || a.created_at || 0))
+    .slice(0, 5)
+})
+
+const formatDate = (date) => {
+  const d = new Date(date)
+  return d.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  })
+}
 
 const columns = [
-  { name: 'date', label: 'Date', field: 'date', align: 'left' },
+  { name: 'date', label: 'Date', field: 'date', align: 'left', format: (val) => formatDate(val) },
+  { name: 'counterparty', label: 'Counterparty', field: 'counterparty_name', align: 'left' },
   { name: 'description', label: 'Description', field: 'description', align: 'left' },
-  { name: 'type', label: 'Type', field: 'type' },
+  { name: 'status', label: 'Status', field: 'status', align: 'left' },
   { name: 'amount', label: 'Amount', field: 'amount', align: 'right' },
-];
+]
+
+const getStatusColor = (status) => {
+  switch (status) {
+    case 'completed':
+    case 'successful':
+      return 'positive'
+    case 'pending':
+      return 'warning'
+    case 'failed':
+      return 'negative'
+    default:
+      return 'grey'
+  }
+}
 
 function receiveMoney() {
   console.log('Receive money clicked');
