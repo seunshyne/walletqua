@@ -41,7 +41,12 @@
       </q-toolbar>
     </q-header>
 
-    <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
+    <q-drawer
+      v-model="leftDrawerOpen"
+      show-if-above
+      bordered
+      @mouseleave="closeLeftDrawer"
+    >
       <q-list>
         <!-- Logo/Title -->
         <q-item-label header class="text-weight-bold">Prime Wallet</q-item-label>
@@ -193,6 +198,10 @@ const logout = async () => {
 
 function toggleLeftDrawer() {
   leftDrawerOpen.value = !leftDrawerOpen.value;
+}
+
+function closeLeftDrawer() {
+  leftDrawerOpen.value = false;
 }
 </script>
 
