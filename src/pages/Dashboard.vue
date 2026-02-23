@@ -51,6 +51,16 @@
             </q-td>
           </template>
 
+          <template v-slot:body-cell-type="props">
+            <q-td :props="props">
+              <q-badge
+                :label="props.row.type || 'unknown'"
+                :color="props.row.type === 'debit' ? 'negative' : 'positive'"
+                text-color="white"
+              />
+            </q-td>
+          </template>
+
           <template v-slot:body-cell-amount="props">
             <q-td :props="props">
               <span :class="props.row.type === 'debit' ? 'text-negative' : 'text-positive'">
@@ -130,6 +140,7 @@ const formatDate = (date) => {
 
 const columns = [
   { name: 'date', label: 'Date', field: 'date', align: 'left', format: (val) => formatDate(val) },
+  { name: 'type', label: 'Type', field: 'type', align: 'left' },
   { name: 'counterparty', label: 'Counterparty', field: 'counterparty_name', align: 'left' },
   { name: 'description', label: 'Description', field: 'description', align: 'left' },
   { name: 'status', label: 'Status', field: 'status', align: 'left' },
