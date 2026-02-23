@@ -103,7 +103,7 @@ function receiveMoney() {
 /* Use a deep blue background for strong contrast */
 .dashboard-balance-section {
   background: linear-gradient(90deg, #0d1b2a 0%, #1b263b 100%);
-  border-radius: 16px;
+  border-radius: 10px !important;
   box-shadow: 0 2px 12px rgba(25, 118, 210, 0.08);
   padding: 24px 24px 18px 24px;
   margin-bottom: 18px;
@@ -116,6 +116,7 @@ function receiveMoney() {
   opacity: 0.92;
   margin-bottom: 8px;
   letter-spacing: 0.5px;
+  
 }
 .dashboard-balance-value {
   display: flex;
@@ -131,9 +132,9 @@ function receiveMoney() {
   font-size: 2.2rem;
   font-weight: bold;
   margin-right: 8px;
+  border-radius: 50%;
   text-shadow: 0 2px 8px rgba(0,0,0,0.18);
   background: rgba(0,0,0,0.18);
-  border-radius: 8px;
   padding: 2px 12px;
   display: inline-block;
 }
@@ -185,7 +186,7 @@ function receiveMoney() {
   }
   .dashboard-balance-section {
     padding: 18px 12px 12px 12px !important;
-    border-radius: 14px !important;
+    border-radius: 10px !important;
     margin-bottom: 14px !important;
   }
   .dashboard-balance-label {
