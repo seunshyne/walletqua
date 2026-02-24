@@ -200,7 +200,11 @@ export const useAuthStore = defineStore("authStore", {
     getters: {
         isAuthenticated: (state) => !!state.user,
         getUserWallet: (state) => state.wallet,
-        getWalletBalance: (state) => state.wallet?.balance ?? 0,
+        getWalletBalance: (state) => {
+            const rawBalance = state.wallet?.balance ?? 0;
+            const numericBalance = Number(String(rawBalance).replace(/,/g, ""));
+            return Number.isFinite(numericBalance) ? numericBalance : 0;
+        },
         getWalletAddress: (state) => state.wallet?.address ?? "",
         getWalletCurrency: (state) => state.wallet?.currency ?? "NGN",
     },

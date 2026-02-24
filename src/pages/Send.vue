@@ -71,7 +71,7 @@
             <!-- Amount Input -->
             <q-input
               square
-              v-model="formData.amount"
+              v-model.number="formData.amount"
               type="number"
               label="Amount"
               hint="Enter amount to send"
@@ -228,16 +228,18 @@ onBeforeUnmount(() => {
 const validateForm = () => {
   errors.recipient = ''
   errors.amount = ''
+  const amount = Number(formData.amount)
+  const balance = Number(String(authStore.getWalletBalance).replace(/,/g, ''))
 
   if (!formData.recipient.trim()) {
     errors.recipient = 'Recipient is required'
   }
 
-  if (!formData.amount || formData.amount <= 0) {
+  if (!Number.isFinite(amount) || amount <= 0) {
     errors.amount = 'Amount must be greater than 0'
   }
 
-  if (formData.amount > authStore.getWalletBalance) {
+  if (Number.isFinite(amount) && Number.isFinite(balance) && amount > balance) {
     errors.amount = 'Insufficient balance'
   }
 
