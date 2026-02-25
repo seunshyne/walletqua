@@ -23,7 +23,10 @@ export const authService = {
       const response = await apiClient.post(AUTH_ENDPOINTS.LOGIN, {
         email,
         password,
-      }, { includeAuth: false })
+      }, {
+        includeAuth: false,
+        skipCsrf: true,
+      })
 
       const { token, user, wallet } = response.data
 
@@ -58,6 +61,9 @@ export const authService = {
         email,
         password,
         password_confirmation: passwordConfirmation,
+      }, {
+        includeAuth: false,
+        skipCsrf: true,
       })
 
       return {
@@ -79,7 +85,10 @@ export const authService = {
    */
   async logout() {
     try {
-      await apiClient.post(AUTH_ENDPOINTS.LOGOUT, null, { includeAuth: true })
+      await apiClient.post(AUTH_ENDPOINTS.LOGOUT, null, {
+        includeAuth: true,
+        skipCsrf: true,
+      })
       localStorage.removeItem('token')
       return { success: true }
     } catch (error) {
@@ -115,6 +124,7 @@ export const authService = {
     try {
       const response = await apiClient.post(AUTH_ENDPOINTS.RESEND_VERIFICATION, { email }, {
         includeAuth: false,
+        skipCsrf: true,
       })
       return {
         success: true,

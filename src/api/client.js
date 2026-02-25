@@ -100,7 +100,7 @@ class APIClient {
     }
 
     // Laravel expects X-XSRF-TOKEN header for state-changing requests.
-    if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method.toUpperCase())) {
+    if (!skipCsrf && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method.toUpperCase())) {
       const xsrfToken = this.getCookie('XSRF-TOKEN')
       if (xsrfToken) {
         config.headers['X-XSRF-TOKEN'] = decodeURIComponent(xsrfToken)
