@@ -1,6 +1,6 @@
 import { defineStore, acceptHMRUpdate } from 'pinia'
+import { useAuthStore } from 'src/stores/auth'
 import { walletService } from 'src/services/walletService'
-import apiClient from 'src/api/client'
 
 
 export const useTransactionStore = defineStore('transaction', {
@@ -183,10 +183,24 @@ export const useTransactionStore = defineStore('transaction', {
             this.recipientPreview = null;
 
             try {
-                const response = await apiClient.post('/resolve-recipient', { recipient: input }, {
+                const API_URL = import.meta.env.VITE_API_URL || 'https://primewallet.duckdns.org'
+
+                const res = await fetch(`${API_URL}/api/resolve-recipient`, {
+                    method: 'POST',
+                    credentials: 'include', //cookie-based auth
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem("token")}`,
+                    },
+                    body: JSON.stringify({ recipient: input }),
                     signal: this.controller.signal,
                 })
-                const data = response.data
+                const data = await res.json();
+
+                if (!res.ok) {
+                    throw new Error(data.message || 'Recipient not found')
+                }
 
                 // Map backend response to frontend expected format
                 this.recipientPreview = {

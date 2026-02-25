@@ -36,15 +36,28 @@ export default defineRouter(function (/* { store, ssrContext } */) {
         return;
       }
 
-      if (!authStore.hasSessionCheckCompleted) {
-        await authStore.restoreSession();
+      const hasToken = !!localStorage.getItem("token");
+
+      // If no token, clear user state
+      if (!hasToken && authStore.user) {
+        authStore.user = null;
+        authStore.wallet = null;
+      }
+
+      // Only fetch user if we don't have one yet
+      if (hasToken && !authStore.user) {
+        try {
+          await authStore.getUser();
+        } catch (error) {
+          console.error("Failed to load user:", error);
+          localStorage.removeItem('token');
+          authStore.user = null;
+          authStore.wallet = null;
+        }
       }
 
       if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-        return next({
-          name: 'login',
-          query: { redirect: to.fullPath },
-        });
+        return next({ path: '/' });
       }
 
       if (to.meta.guestOnly && authStore.isAuthenticated) {

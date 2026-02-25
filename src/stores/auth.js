@@ -9,58 +9,71 @@ export const useAuthStore = defineStore("authStore", {
         errors: {},
         message: "",
         isLoading: false,
-        hasSessionCheckCompleted: false,
     }),
     actions: {
-        resetAuthState() {
-            this.user = null;
-            this.wallet = null;
-            this.errors = {};
-            this.message = "";
-        },
+        /**
+         * Load current user profile from API (only if user is null)
+         */
+        async getUser() {
+            const token = localStorage.getItem("token");
+            if (!token) return;
 
-        async restoreSession() {
+            // Don't refetch if user already loaded
+            if (this.user) {
+                // If wallet already has balance, don't refetch
+                if (this.wallet?.balance !== undefined && this.wallet.balance !== null) {
+                    return;
+                }
+                // Always fetch wallet to ensure balance is fresh if we don't have it
+                await this.fetchWallet();
+                return;
+            }
+
             try {
                 const result = await authService.getCurrentUser();
                 if (result.success) {
                     this.user = result.user;
+                    // Fetch wallet after loading user
                     await this.fetchWallet();
                 } else {
-                    this.resetAuthState();
+                    console.error("Failed to get user:", result.error);
                 }
             } catch (err) {
-                this.resetAuthState();
-            } finally {
-                this.hasSessionCheckCompleted = true;
+                console.error("Failed to get user:", err);
             }
         },
 
-        async authenticate(apiRoute, formData) {
+        /**
+         * Authenticate user (login/register)
+         */
+        async authenticate(apiRoute, formData, router) {
             this.errors = {};
             this.message = "";
 
             try {
                 if (apiRoute === "login") {
-                    const result = await authService.login(formData.email, formData.password);
+                    const result = await authService.login(
+                        formData.email,
+                        formData.password
+                    );
 
                     if (result.success) {
-                        // Hydrate from server-authenticated session rather than trusting login payload.
-                        await this.restoreSession();
-                        if (!this.user) {
-                            this.errors = { general: "Login succeeded but session could not be restored." };
-                            return { success: false };
-                        }
-
-                        if (result.wallet) {
-                            this.wallet = result.wallet;
-                        }
+                        this.user = result.user;
+                        this.wallet = result.wallet || null;
                         this.message = result.message;
+                        // Fetch fresh wallet data after login
+                        await this.fetchWallet();
+                        router.push({ path: "/dashboard" });
                         return { success: true, type: "login" };
                     }
 
                     // Check for unverified email
                     if (result.status === 403) {
                         this.message = result.message;
+                        router.push({
+                            path: "/verify-email",
+                            query: { email: formData.email }
+                        });
                         return { success: false, status: "unverified" };
                     }
 
@@ -80,6 +93,10 @@ export const useAuthStore = defineStore("authStore", {
 
                     if (result.success) {
                         this.message = result.message;
+                        router.push({
+                            path: "/verify-email",
+                            query: { email: formData.email }
+                        });
                         return { success: true, type: "register" };
                     }
 
@@ -88,7 +105,6 @@ export const useAuthStore = defineStore("authStore", {
                     return { success: false };
                 }
 
-                return { success: false };
             } catch (err) {
                 console.error("Authentication error:", err);
                 this.errors = { network: "Connection failed. Please try again." };
@@ -120,8 +136,11 @@ export const useAuthStore = defineStore("authStore", {
             } catch (err) {
                 console.error("Logout error:", err);
             } finally {
-                this.resetAuthState();
-                this.hasSessionCheckCompleted = true;
+                this.user = null;
+                this.wallet = null;
+                this.errors = {};
+                this.message = "";
+                localStorage.removeItem("token");
             }
         },
 
@@ -129,7 +148,8 @@ export const useAuthStore = defineStore("authStore", {
          * Fetch user wallet (with debouncing to prevent race conditions)
          */
         async fetchWallet() {
-            if (!this.user) return null;
+            const token = localStorage.getItem("token");
+            if (!token) return null;
 
             // Prevent multiple simultaneous fetches
             if (this.isLoading) {

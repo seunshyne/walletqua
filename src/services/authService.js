@@ -1,6 +1,6 @@
 /**
  * Authentication Service
- * Cookie-based session auth with Laravel Sanctum
+ * Handles login, register, and logout operations
  */
 
 import apiClient from '../api/client'
@@ -19,16 +19,21 @@ export const authService = {
    */
   async login(email, password) {
     try {
-      await apiClient.getCsrfCookie()
+      console.log('Attempting login with email:', email) // Debug log
       const response = await apiClient.post(AUTH_ENDPOINTS.LOGIN, {
         email,
         password,
-      }, { skipCsrf: true })
+      }, { includeAuth: false })
 
-      const { user, wallet } = response.data
+      const { token, user, wallet } = response.data
+
+      if (token) {
+        localStorage.setItem('token', token)
+      }
 
       return {
         success: true,
+        token,
         user,
         wallet,
         message: response.data.message || 'Login successful',
@@ -74,10 +79,14 @@ export const authService = {
    */
   async logout() {
     try {
-      await apiClient.post(AUTH_ENDPOINTS.LOGOUT, null)
+      await apiClient.post(AUTH_ENDPOINTS.LOGOUT, null, { includeAuth: true })
+      localStorage.removeItem('token')
       return { success: true }
     } catch (error) {
-      return { success: false, error: error.message }
+      console.error('Logout error:', error)
+      // Clear token anyway
+      localStorage.removeItem('token')
+      return { success: false, error }
     }
   },
 
@@ -104,7 +113,9 @@ export const authService = {
    */
   async resendVerificationEmail(email) {
     try {
-      const response = await apiClient.post(AUTH_ENDPOINTS.RESEND_VERIFICATION, { email })
+      const response = await apiClient.post(AUTH_ENDPOINTS.RESEND_VERIFICATION, { email }, {
+        includeAuth: false,
+      })
       return {
         success: true,
         message: response.data.message || 'Verification email sent',
