@@ -45,6 +45,17 @@ class APIClient {
     }
   }
 
+  getCookie(name) {
+    if (typeof document === 'undefined') return null
+    const encodedName = `${encodeURIComponent(name)}=`
+    const cookie = document.cookie
+      .split('; ')
+      .find((entry) => entry.startsWith(encodedName))
+
+    if (!cookie) return null
+    return cookie.substring(encodedName.length)
+  }
+
   buildURL(endpoint, useApiPrefix = true) {
     if (endpoint.startsWith('http://') || endpoint.startsWith('https://')) {
       const absoluteUrl = new URL(endpoint)
@@ -62,7 +73,7 @@ class APIClient {
 
   async getCsrfCookie() {
     const csrfUrl = `${this.originURL}/sanctum/csrf-cookie`
-    await fetch(csrfUrl, {
+    const response = await fetch(csrfUrl, {
       method: 'GET',
       credentials: 'include',
       headers: {
@@ -70,6 +81,10 @@ class APIClient {
         'X-Requested-With': 'XMLHttpRequest',
       },
     })
+
+    if (!response.ok) {
+      throw new Error(`Failed to initialize CSRF cookie: HTTP ${response.status}`)
+    }
   }
 
   async request(endpoint, options = {}) {
@@ -87,10 +102,18 @@ class APIClient {
       await this.getCsrfCookie()
     }
 
+    const requestHeaders = this.getHeaders(headers)
+    if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(normalizedMethod)) {
+      const xsrfToken = this.getCookie('XSRF-TOKEN')
+      if (xsrfToken) {
+        requestHeaders['X-XSRF-TOKEN'] = decodeURIComponent(xsrfToken)
+      }
+    }
+
     const url = this.buildURL(endpoint, useApiPrefix)
     const response = await fetch(url, {
       method: normalizedMethod,
-      headers: this.getHeaders(headers),
+      headers: requestHeaders,
       credentials: 'include',
       body: body == null ? undefined : (typeof body === 'string' ? body : JSON.stringify(body)),
       ...otherOptions,
