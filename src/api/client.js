@@ -38,6 +38,20 @@ class APIClient {
   }
 
   /**
+   * Read a cookie value by name
+   */
+  getCookie(name) {
+    if (typeof document === 'undefined') return null
+    const encodedName = `${encodeURIComponent(name)}=`
+    const cookie = document.cookie
+      .split('; ')
+      .find((entry) => entry.startsWith(encodedName))
+
+    if (!cookie) return null
+    return cookie.substring(encodedName.length)
+  }
+
+  /**
    * Get CSRF cookie from Laravel Sanctum
    */
   async getCsrfCookie() {
@@ -83,6 +97,14 @@ class APIClient {
       headers: { ...this.getHeaders(includeAuth), ...headers },
       credentials: 'include', // Important for CSRF cookies
       ...otherOptions,
+    }
+
+    // Laravel expects X-XSRF-TOKEN header for state-changing requests.
+    if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method.toUpperCase())) {
+      const xsrfToken = this.getCookie('XSRF-TOKEN')
+      if (xsrfToken) {
+        config.headers['X-XSRF-TOKEN'] = decodeURIComponent(xsrfToken)
+      }
     }
 
     if (body) {
