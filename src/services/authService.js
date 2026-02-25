@@ -1,6 +1,6 @@
 /**
  * Authentication Service
- * Handles login, register, and logout operations
+ * Cookie-based session auth with Laravel Sanctum
  */
 
 import apiClient from '../api/client'
@@ -19,21 +19,16 @@ export const authService = {
    */
   async login(email, password) {
     try {
-      console.log('Attempting login with email:', email) // Debug log
+      await apiClient.getCsrfCookie()
       const response = await apiClient.post(AUTH_ENDPOINTS.LOGIN, {
         email,
         password,
-      }, { includeAuth: false })
+      }, { useApiPrefix: false, skipCsrf: true })
 
-      const { token, user, wallet } = response.data
-
-      if (token) {
-        localStorage.setItem('token', token)
-      }
+      const { user, wallet } = response.data
 
       return {
         success: true,
-        token,
         user,
         wallet,
         message: response.data.message || 'Login successful',
@@ -58,7 +53,7 @@ export const authService = {
         email,
         password,
         password_confirmation: passwordConfirmation,
-      }, { includeAuth: false })
+      })
 
       return {
         success: true,
@@ -79,14 +74,10 @@ export const authService = {
    */
   async logout() {
     try {
-      await apiClient.post(AUTH_ENDPOINTS.LOGOUT, null, { includeAuth: true })
-      localStorage.removeItem('token')
+      await apiClient.post(AUTH_ENDPOINTS.LOGOUT, null, { useApiPrefix: false })
       return { success: true }
     } catch (error) {
-      console.error('Logout error:', error)
-      // Clear token anyway
-      localStorage.removeItem('token')
-      return { success: false, error }
+      return { success: false, error: error.message }
     }
   },
 
@@ -113,9 +104,7 @@ export const authService = {
    */
   async resendVerificationEmail(email) {
     try {
-      const response = await apiClient.post(AUTH_ENDPOINTS.RESEND_VERIFICATION, { email }, {
-        includeAuth: false,
-      })
+      const response = await apiClient.post(AUTH_ENDPOINTS.RESEND_VERIFICATION, { email })
       return {
         success: true,
         message: response.data.message || 'Verification email sent',

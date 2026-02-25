@@ -1,149 +1,133 @@
-/**
- * HTTP Client - Core API communication layer
- * Handles all HTTP requests with automatic token injection and error handling
- */
-
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://primewallet.duckdns.org'
+const LOCALHOST_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]'])
+
+class APIError extends Error {
+  constructor(message, status, data, url) {
+    super(message)
+    this.name = 'APIError'
+    this.status = status
+    this.data = data
+    this.url = url
+  }
+}
 
 class APIClient {
   constructor(baseURL = API_BASE_URL) {
-    this.baseURL = `${baseURL}/api`
+    const normalized = this.normalizeBaseURL(baseURL)
+    this.originURL = normalized
+    this.apiBaseURL = `${normalized}/api`
+    this.unauthorizedHandler = null
     this.defaultHeaders = {
+      Accept: 'application/json',
       'Content-Type': 'application/json',
-      'Accept': 'application/json',
+      'X-Requested-With': 'XMLHttpRequest',
     }
   }
 
-  /**
-   * Get authorization token from localStorage
-   */
-  getAuthToken() {
-    return localStorage.getItem('token')
+  normalizeBaseURL(baseURL) {
+    const parsed = new URL(baseURL)
+    const isLocalhost = LOCALHOST_HOSTS.has(parsed.hostname)
+    if (!isLocalhost && parsed.protocol !== 'https:') {
+      throw new Error(`Insecure API URL "${baseURL}". Production API calls must use HTTPS.`)
+    }
+
+    return parsed.href.replace(/\/$/, '')
   }
 
-  /**
-   * Build request headers with optional auth token
-   */
-  getHeaders(includeAuth = true) {
-    const headers = { ...this.defaultHeaders }
+  setUnauthorizedHandler(handler) {
+    this.unauthorizedHandler = typeof handler === 'function' ? handler : null
+  }
 
-    if (includeAuth) {
-      const token = this.getAuthToken()
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`
+  getHeaders(extraHeaders = {}) {
+    return {
+      ...this.defaultHeaders,
+      ...extraHeaders,
+    }
+  }
+
+  buildURL(endpoint, useApiPrefix = true) {
+    if (endpoint.startsWith('http://') || endpoint.startsWith('https://')) {
+      const absoluteUrl = new URL(endpoint)
+      const isLocalhost = LOCALHOST_HOSTS.has(absoluteUrl.hostname)
+      if (!isLocalhost && absoluteUrl.protocol !== 'https:') {
+        throw new Error(`Blocked insecure request URL "${endpoint}".`)
       }
+
+      return absoluteUrl.toString()
     }
 
-    return headers
+    const base = useApiPrefix ? this.apiBaseURL : this.originURL
+    return `${base}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`
   }
 
-  /**
-   * Get CSRF cookie from Laravel Sanctum
-   */
   async getCsrfCookie() {
-    try {
-      const csrfUrl = `${new URL(this.baseURL).origin}/sanctum/csrf-cookie`
-      await fetch(csrfUrl, {
-        method: 'GET',
-        credentials: 'include',
-        headers: {
-          'Accept': 'application/json',
-        }
-      })
-      console.log('CSRF cookie obtained')
-    } catch (error) {
-      console.warn('Failed to get CSRF cookie:', error)
-    }
+    const csrfUrl = `${this.originURL}/sanctum/csrf-cookie`
+    await fetch(csrfUrl, {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        Accept: 'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
+      },
+    })
   }
 
-  /**
-   * Make HTTP request
-   */
   async request(endpoint, options = {}) {
     const {
       method = 'GET',
       body = null,
       headers = {},
-      includeAuth = true,
       skipCsrf = false,
+      useApiPrefix = true,
       ...otherOptions
     } = options
 
-    // Get CSRF cookie before state-changing requests
-    if (!skipCsrf && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method.toUpperCase())) {
+    const normalizedMethod = method.toUpperCase()
+    if (!skipCsrf && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(normalizedMethod)) {
       await this.getCsrfCookie()
     }
 
-    const url = `${this.baseURL}${endpoint}`
-    
-    console.log('Making request to:', url) // Debug log
-    
-    const config = {
-      method,
-      headers: { ...this.getHeaders(includeAuth), ...headers },
-      credentials: 'include', // Important for CSRF cookies
+    const url = this.buildURL(endpoint, useApiPrefix)
+    const response = await fetch(url, {
+      method: normalizedMethod,
+      headers: this.getHeaders(headers),
+      credentials: 'include',
+      body: body == null ? undefined : (typeof body === 'string' ? body : JSON.stringify(body)),
       ...otherOptions,
-    }
+    })
 
-    if (body) {
-      config.body = typeof body === 'string' ? body : JSON.stringify(body)
-    }
-
-    try {
-      const response = await fetch(url, config)
-      return this.handleResponse(response)
-    } catch (error) {
-      return this.handleError(error)
-    }
+    return this.handleResponse(response)
   }
 
-  /**
-   * Handle API response
-   */
   async handleResponse(response) {
-    const contentType = response.headers.get('content-type')
-    const data = contentType?.includes('application/json')
+    const contentType = response.headers.get('content-type') || ''
+    const data = contentType.includes('application/json')
       ? await response.json()
       : await response.text()
 
     if (!response.ok) {
-      const error = new Error(data.message || `HTTP ${response.status}`)
-      error.status = response.status
-      error.data = data
-      
-      console.error('API Response Error:', {
-        status: response.status,
-        url: response.url,
-        data
-      })
-      
+      const message = data?.message || `HTTP ${response.status}`
+      const error = new APIError(message, response.status, data, response.url)
+
+      if (response.status === 401 && this.unauthorizedHandler) {
+        this.unauthorizedHandler(error)
+      }
+
       throw error
     }
 
     return {
+      ok: true,
       status: response.status,
       data,
-      ok: response.ok,
     }
   }
 
-  /**
-   * Handle fetch errors
-   */
-  handleError(error) {
-    console.error('API Error:', error)
-    const apiError = new Error(error.message || 'Network error')
-    apiError.originalError = error
-    throw apiError
-  }
-
-  // Convenience methods
   get(endpoint, options = {}) {
     return this.request(endpoint, { ...options, method: 'GET' })
   }
 
   post(endpoint, body, options = {}) {
-    console.log('POST request to:', endpoint, 'with body:', body) // Debug log
     return this.request(endpoint, { ...options, method: 'POST', body })
   }
 
@@ -160,4 +144,5 @@ class APIClient {
   }
 }
 
+export { APIClient, APIError }
 export default new APIClient()

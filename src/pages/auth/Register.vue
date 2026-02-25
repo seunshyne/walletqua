@@ -293,11 +293,12 @@ watch(() => formData.email, (newEmail) => {
 
 const handleSubmit = async () => {
   if (!authStore) return
-  const result = await authStore.authenticate("register", formData, router);
+  const result = await authStore.authenticate("register", formData);
   if (result?.success && result.type === "register") {
     // Redirect to verify email page
     router.replace({
       name: "verify-email",
+      query: { email: formData.email }
     });
   }
   // else {

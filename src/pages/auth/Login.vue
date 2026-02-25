@@ -197,18 +197,17 @@ const formData = reactive({
 
 const handleSubmit = async () => {
   if (!authStore) return
-  console.log('Submitting login form with:', formData)
-  const result = await authStore.authenticate('login', formData, router)
+  const result = await authStore.authenticate('login', formData)
   if (result && result.success && result.type === 'login') {
-    // Redirect to dashboard after successful login
-    router.replace({ name: 'dashboard' })
+    const redirectTarget = typeof route.query.redirect === 'string' ? route.query.redirect : null
+    await router.replace(redirectTarget || { name: 'dashboard' })
   } else if (result && result.status === 'unverified') {
-  //   router.replace({
-  //   path: '/verify-email',
-  //   query: { email: formData.email }
-  // })
+    await router.replace({
+      path: '/verify-email',
+      query: { email: formData.email }
+    })
   } else {
-    console.log('Login failed, not redirecting')
+    // errors are already hydrated in store state
   }
 }
 
