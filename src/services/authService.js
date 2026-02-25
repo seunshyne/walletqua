@@ -23,7 +23,7 @@ export const authService = {
       const response = await apiClient.post(AUTH_ENDPOINTS.LOGIN, {
         email,
         password,
-      }, { useApiPrefix: false, skipCsrf: true })
+      }, { skipCsrf: true })
 
       const { user, wallet } = response.data
 
@@ -74,7 +74,7 @@ export const authService = {
    */
   async logout() {
     try {
-      await apiClient.post(AUTH_ENDPOINTS.LOGOUT, null, { useApiPrefix: false })
+      await apiClient.post(AUTH_ENDPOINTS.LOGOUT, null)
       return { success: true }
     } catch (error) {
       return { success: false, error: error.message }
