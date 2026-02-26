@@ -14,16 +14,6 @@ const AUTH_ENDPOINTS = {
   RESEND_VERIFICATION: '/email/resend',
 };
 
-// Helper: hit the CSRF endpoint before any auth mutation
-// Laravel sets the XSRF-TOKEN cookie, Axios picks it up automatically
-const getCsrfCookie = () =>
-  axios.get('https://app-primewallet.duckdns.org/sanctum/csrf-cookie', {
-    withCredentials: true,
-  })
-
-// We need plain axios for the CSRF call since it's outside /api
-import axios from 'axios'
-
 export const authService = {
   /**
    * Login with email and password
