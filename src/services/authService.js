@@ -20,8 +20,6 @@ export const authService = {
    */
   async login(email, password) {
     try {
-      await getCsrfCookie() // Ensure CSRF cookie is set before login
-      console.log('Attempting login with email:', email) // Debug log
       const response = await apiClient.post(AUTH_ENDPOINTS.LOGIN, {
         email,
         password,
@@ -48,8 +46,6 @@ export const authService = {
    */
   async register(name, email, password, passwordConfirmation) {
     try {
-      await getCsrfCookie()  // get CSRF before register too
-
       const response = await apiClient.post(AUTH_ENDPOINTS.REGISTER, {
         name,
         email,
