@@ -6,7 +6,6 @@
 import apiClient from '../api/client'
 
 const AUTH_ENDPOINTS = {
-  CSRF: '/../../sanctum/csrf-cookie',  // outside /api prefix
   LOGIN: '/auth/login',
   REGISTER: '/auth/register',
   LOGOUT: '/auth/logout',
@@ -85,7 +84,9 @@ export const authService = {
    */
   async getCurrentUser() {
     try {
-      const response = await apiClient.get(AUTH_ENDPOINTS.GET_USER)
+      const response = await apiClient.get(AUTH_ENDPOINTS.GET_USER, {
+        skipUnauthorizedHandler: true,
+      })
       return {
         success: true,
         user: response.data.user || response.data,

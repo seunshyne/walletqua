@@ -6,6 +6,7 @@ export const useAuthStore = defineStore("authStore", {
     state: () => ({
         user: null,
         wallet: null,
+        sessionChecked: false,
         errors: {},
         message: "",
         isLoading: false,
@@ -21,6 +22,7 @@ export const useAuthStore = defineStore("authStore", {
                 await this.fetchWallet()
                 return
             }
+            if (this.sessionChecked) return
 
             try {
                 const result = await authService.getCurrentUser();
@@ -34,6 +36,8 @@ export const useAuthStore = defineStore("authStore", {
             } catch (err) {
                 console.error("Failed to get user:", err);
                 this.user = null
+            } finally {
+                this.sessionChecked = true
             }
         },
 
@@ -54,6 +58,7 @@ export const useAuthStore = defineStore("authStore", {
                     if (result.success) {
                         this.user = result.user;
                         this.wallet = result.wallet || null;
+                        this.sessionChecked = true;
                         this.message = result.message;
                         // Fetch fresh wallet data after login
                         await this.fetchWallet();
@@ -87,6 +92,7 @@ export const useAuthStore = defineStore("authStore", {
 
                     if (result.success) {
                         this.message = result.message;
+                        this.sessionChecked = true;
                         router.push({
                             path: "/verify-email",
                             query: { email: formData.email }
@@ -132,6 +138,7 @@ export const useAuthStore = defineStore("authStore", {
             } finally {
                 this.user = null;
                 this.wallet = null;
+                this.sessionChecked = true;
                 this.errors = {};
                 this.message = "";
             }

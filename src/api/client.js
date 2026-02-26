@@ -72,6 +72,7 @@ class APIClient {
       method = 'GET',
       body = null,
       headers = {},
+      skipUnauthorizedHandler = false,
       ...otherOptions
     } = options
 
@@ -81,9 +82,7 @@ class APIClient {
     }
 
     const url = `${this.baseURL}${endpoint}`
-    
-    console.log('Making request to:', url) // Debug log
-    
+
     const config = {
       method,
       headers: { ...this.getHeaders(), ...headers },
@@ -105,7 +104,7 @@ class APIClient {
 
     try {
       const response = await fetch(url, config)
-      return this.handleResponse(response)
+      return this.handleResponse(response, { skipUnauthorizedHandler })
     } catch (error) {
       return this.handleError(error)
     }
@@ -114,7 +113,8 @@ class APIClient {
   /**
    * Handle API response
    */
-  async handleResponse(response) {
+  async handleResponse(response, options = {}) {
+    const { skipUnauthorizedHandler = false } = options
     const contentType = response.headers.get('content-type')
     const data = contentType?.includes('application/json')
       ? await response.json()
@@ -122,7 +122,9 @@ class APIClient {
 
      // Handle session expiry globally
     if (response.status === 401) {
-      await this.handleUnauthorized()
+      if (!skipUnauthorizedHandler) {
+        await this.handleUnauthorized()
+      }
       const error = new Error('Unauthenticated')
       error.status = 401
       error.data = data

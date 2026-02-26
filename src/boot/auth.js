@@ -1,14 +1,16 @@
 import { boot } from 'quasar/wrappers'
 import { useAuthStore } from 'src/stores/auth'
 
-export default boot(async () => {
+export default boot(async ({ router }) => {
   const authStore = useAuthStore()
 
-   // Handle session expiry from anywhere in the app
+  // Handle session expiry from anywhere in the app
   window.addEventListener('auth:unauthorized', () => {
     authStore.user = null
     authStore.wallet = null
-    router.replace({ path: '/' })
+    if (router.currentRoute.value.path !== '/') {
+      router.replace({ path: '/' })
+    }
   })
 
   // Try to restore session on app load
