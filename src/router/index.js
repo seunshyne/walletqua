@@ -3,14 +3,6 @@ import { createRouter, createMemoryHistory, createWebHistory, createWebHashHisto
 import routes from './routes'
 import { useAuthStore } from 'src/stores/auth'
 
-/*
- * If not building with SSR mode, you can
- * directly export the Router instantiation;
- *
- * The function below can be async too; either use
- * async/await or return a Promise which resolves
- * with the Router instance.
- */
 
 export default defineRouter(function (/* { store, ssrContext } */) {
   const createHistory = process.env.SERVER
@@ -31,33 +23,16 @@ export default defineRouter(function (/* { store, ssrContext } */) {
   Router.beforeEach(async (to, from, next) => {
     try {
       const authStore = useAuthStore();
-      if (!authStore) {
-        next();
-        return;
-      }
-
-      const hasToken = !!localStorage.getItem("token");
-
-      // If no token, clear user state
-      if (!hasToken && authStore.user) {
-        authStore.user = null;
-        authStore.wallet = null;
-      }
-
-      // Only fetch user if we don't have one yet
-      if (hasToken && !authStore.user) {
-        try {
-          await authStore.getUser();
+      if (!authStore.user) {
+         try {
+          await authStore.getUser()
         } catch (error) {
-          console.error("Failed to load user:", error);
-          localStorage.removeItem('token');
-          authStore.user = null;
-          authStore.wallet = null;
+          // 401 = not logged in, that's fine
         }
       }
 
       if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-        return next({ path: '/' });
+        return next({ path: '/' })
       }
 
       if (to.meta.guestOnly && authStore.isAuthenticated) {

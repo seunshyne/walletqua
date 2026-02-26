@@ -11,30 +11,15 @@ class APIClient {
     this.defaultHeaders = {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
+      'X-Requested-With': 'XMLHttpRequest',
     }
   }
 
   /**
-   * Get authorization token from localStorage
+   * Build request headers
    */
-  getAuthToken() {
-    return localStorage.getItem('token')
-  }
-
-  /**
-   * Build request headers with optional auth token
-   */
-  getHeaders(includeAuth = true) {
-    const headers = { ...this.defaultHeaders }
-
-    if (includeAuth) {
-      const token = this.getAuthToken()
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`
-      }
-    }
-
-    return headers
+  getHeaders() {
+    return { ...this.defaultHeaders }
   }
 
   /**
@@ -64,9 +49,27 @@ class APIClient {
           'Accept': 'application/json',
         }
       })
-      console.log('CSRF cookie obtained')
     } catch (error) {
       console.warn('Failed to get CSRF cookie:', error)
+    }
+  }
+
+  /**
+   * Handle 401 globally - session expired or not logged in
+   * Dynamically imports store to avoid circular dependency
+   */
+  async handleUnauthorized() {
+    try {
+      const { useAuthStore } = await import('src/stores/auth')
+      const authStore = useAuthStore()
+      // Only redirect if user WAS logged in - prevents redirect loop on login page
+      if (authStore.user) {
+        authStore.user = null
+        authStore.wallet = null
+        window.location.href = '/'
+      }
+    } catch (e) {
+      // store not available yet (e.g. during boot), ignore
     }
   }
 
@@ -78,13 +81,11 @@ class APIClient {
       method = 'GET',
       body = null,
       headers = {},
-      includeAuth = true,
-      skipCsrf = false,
       ...otherOptions
     } = options
 
     // Get CSRF cookie before state-changing requests
-    if (!skipCsrf && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method.toUpperCase())) {
+    if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method.toUpperCase())) {
       await this.getCsrfCookie()
     }
 
@@ -100,7 +101,7 @@ class APIClient {
     }
 
     // Laravel expects X-XSRF-TOKEN header for state-changing requests.
-    if (!skipCsrf && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method.toUpperCase())) {
+    if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method.toUpperCase())) {
       const xsrfToken = this.getCookie('XSRF-TOKEN')
       if (xsrfToken) {
         config.headers['X-XSRF-TOKEN'] = decodeURIComponent(xsrfToken)
@@ -128,6 +129,15 @@ class APIClient {
       ? await response.json()
       : await response.text()
 
+     // Handle session expiry globally
+    if (response.status === 401) {
+      await this.handleUnauthorized()
+      const error = new Error('Unauthenticated')
+      error.status = 401
+      error.data = data
+      throw error
+    }
+
     if (!response.ok) {
       const error = new Error(data.message || `HTTP ${response.status}`)
       error.status = response.status
@@ -153,7 +163,7 @@ class APIClient {
    * Handle fetch errors
    */
   handleError(error) {
-    console.error('API Error:', error)
+    console.error('API Network Error:', error)
     const apiError = new Error(error.message || 'Network error')
     apiError.originalError = error
     throw apiError
@@ -165,7 +175,6 @@ class APIClient {
   }
 
   post(endpoint, body, options = {}) {
-    console.log('POST request to:', endpoint, 'with body:', body) // Debug log
     return this.request(endpoint, { ...options, method: 'POST', body })
   }
 

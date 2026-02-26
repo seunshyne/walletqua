@@ -6,6 +6,7 @@
 import apiClient from '../api/client'
 
 const AUTH_ENDPOINTS = {
+  CSRF: '/../../sanctum/csrf-cookie',  // outside /api prefix
   LOGIN: '/auth/login',
   REGISTER: '/auth/register',
   LOGOUT: '/auth/logout',
@@ -13,32 +14,33 @@ const AUTH_ENDPOINTS = {
   RESEND_VERIFICATION: '/email/resend',
 };
 
+// Helper: hit the CSRF endpoint before any auth mutation
+// Laravel sets the XSRF-TOKEN cookie, Axios picks it up automatically
+const getCsrfCookie = () =>
+  axios.get('https://app-primewallet.duckdns.org/sanctum/csrf-cookie', {
+    withCredentials: true,
+  })
+
+// We need plain axios for the CSRF call since it's outside /api
+import axios from 'axios'
+
 export const authService = {
   /**
    * Login with email and password
    */
   async login(email, password) {
     try {
+      await getCsrfCookie() // Ensure CSRF cookie is set before login
       console.log('Attempting login with email:', email) // Debug log
       const response = await apiClient.post(AUTH_ENDPOINTS.LOGIN, {
         email,
         password,
-      }, {
-        includeAuth: false,
-        skipCsrf: true,
       })
-
-      const { token, user, wallet } = response.data
-
-      if (token) {
-        localStorage.setItem('token', token)
-      }
 
       return {
         success: true,
-        token,
-        user,
-        wallet,
+        user: response.data.user,
+        wallet: response.data.wallet,
         message: response.data.message || 'Login successful',
       }
     } catch (error) {
@@ -56,14 +58,13 @@ export const authService = {
    */
   async register(name, email, password, passwordConfirmation) {
     try {
+      await getCsrfCookie()  // get CSRF before register too
+
       const response = await apiClient.post(AUTH_ENDPOINTS.REGISTER, {
         name,
         email,
         password,
         password_confirmation: passwordConfirmation,
-      }, {
-        includeAuth: false,
-        skipCsrf: true,
       })
 
       return {
@@ -85,16 +86,10 @@ export const authService = {
    */
   async logout() {
     try {
-      await apiClient.post(AUTH_ENDPOINTS.LOGOUT, null, {
-        includeAuth: true,
-        skipCsrf: true,
-      })
-      localStorage.removeItem('token')
-      return { success: true }
+      await apiClient.post(AUTH_ENDPOINTS.LOGOUT)
+      return { success: true } // Assume logout is successful even if API call fails
     } catch (error) {
       console.error('Logout error:', error)
-      // Clear token anyway
-      localStorage.removeItem('token')
       return { success: false, error }
     }
   },
@@ -122,10 +117,7 @@ export const authService = {
    */
   async resendVerificationEmail(email) {
     try {
-      const response = await apiClient.post(AUTH_ENDPOINTS.RESEND_VERIFICATION, { email }, {
-        includeAuth: false,
-        skipCsrf: true,
-      })
+      const response = await apiClient.post(AUTH_ENDPOINTS.RESEND_VERIFICATION, { email })
       return {
         success: true,
         message: response.data.message || 'Verification email sent',

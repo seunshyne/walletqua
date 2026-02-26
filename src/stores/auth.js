@@ -15,18 +15,11 @@ export const useAuthStore = defineStore("authStore", {
          * Load current user profile from API (only if user is null)
          */
         async getUser() {
-            const token = localStorage.getItem("token");
-            if (!token) return;
-
-            // Don't refetch if user already loaded
+            // No token check needed - if session cookie exists, the request will succeed
             if (this.user) {
-                // If wallet already has balance, don't refetch
-                if (this.wallet?.balance !== undefined && this.wallet.balance !== null) {
-                    return;
-                }
-                // Always fetch wallet to ensure balance is fresh if we don't have it
-                await this.fetchWallet();
-                return;
+                if (this.wallet?.balance !== undefined && this.wallet.balance !== null) return
+                await this.fetchWallet()
+                return
             }
 
             try {
@@ -36,10 +29,11 @@ export const useAuthStore = defineStore("authStore", {
                     // Fetch wallet after loading user
                     await this.fetchWallet();
                 } else {
-                    console.error("Failed to get user:", result.error);
+                    this.user = null
                 }
             } catch (err) {
                 console.error("Failed to get user:", err);
+                this.user = null
             }
         },
 
@@ -140,7 +134,6 @@ export const useAuthStore = defineStore("authStore", {
                 this.wallet = null;
                 this.errors = {};
                 this.message = "";
-                localStorage.removeItem("token");
             }
         },
 
@@ -148,38 +141,30 @@ export const useAuthStore = defineStore("authStore", {
          * Fetch user wallet (with debouncing to prevent race conditions)
          */
         async fetchWallet() {
-            const token = localStorage.getItem("token");
-            if (!token) return null;
-
-            // Prevent multiple simultaneous fetches
             if (this.isLoading) {
                 return this.wallet;
             }
-
             this.isLoading = true;
 
             try {
                 const result = await walletService.getWallets();
-                
+
                 if (result.success) {
-                    let walletData = Array.isArray(result.wallets) 
+                    let walletData = Array.isArray(result.wallets)
                         ? result.wallets[0]
                         : result.wallets;
-                    
+
                     // Extract the wallet object if it's wrapped in a {wallet: {...}} structure
                     if (walletData?.wallet && !walletData?.id) {
                         walletData = walletData.wallet;
                     }
-                    
+
                     // Only update if we got valid data
                     if (walletData) {
                         this.wallet = walletData;
                     }
                     return this.wallet;
-                } else {
-                    console.error("Failed to fetch wallet:", result.error);
-                    return this.wallet;
-                }
+                } 
             } catch (err) {
                 console.error("Failed to fetch wallet:", err);
                 return this.wallet;
