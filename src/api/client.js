@@ -58,20 +58,11 @@ class APIClient {
    * Handle 401 globally - session expired or not logged in
    * Dynamically imports store to avoid circular dependency
    */
-  async handleUnauthorized() {
-    try {
-      const { useAuthStore } = await import('src/stores/auth')
-      const authStore = useAuthStore()
-      // Only redirect if user WAS logged in - prevents redirect loop on login page
-      if (authStore.user) {
-        authStore.user = null
-        authStore.wallet = null
-        window.location.href = '/'
-      }
-    } catch (e) {
-      // store not available yet (e.g. during boot), ignore
-    }
+  handleUnauthorized() {
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('auth:unauthorized'))
   }
+}
 
   /**
    * Make HTTP request

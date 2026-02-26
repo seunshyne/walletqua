@@ -4,8 +4,14 @@ import { useAuthStore } from 'src/stores/auth'
 export default boot(async () => {
   const authStore = useAuthStore()
 
-  // If a valid session cookie exists, this will succeed
-  // If not (logged out / expired), it will silently fail with 401
+   // Handle session expiry from anywhere in the app
+  window.addEventListener('auth:unauthorized', () => {
+    authStore.user = null
+    authStore.wallet = null
+    router.replace({ path: '/' })
+  })
+
+  // Try to restore session on app load
   try {
     await authStore.getUser()
   } catch (error) {
