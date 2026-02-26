@@ -86,7 +86,7 @@ class APIClient {
     
     const config = {
       method,
-      headers: { ...this.getHeaders(includeAuth), ...headers },
+      headers: { ...this.getHeaders(), ...headers },
       credentials: 'include', // Important for CSRF cookies
       ...otherOptions,
     }
