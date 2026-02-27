@@ -32,17 +32,16 @@ class APIClient {
    * Laravel sets XSRF-TOKEN (JS-readable) and laravel_session (HttpOnly).
    */
   async ensureCsrf() {
-
-    try {
-      await fetch(this.csrfUrl, {
-        method: 'GET',
-        credentials: 'include',
-        headers: { 'Accept': 'application/json' },
-      })
-    } catch (error) {
-      console.warn('Failed to fetch CSRF cookie:', error)
-    }
+  try {
+    await fetch(this.csrfUrl, {
+      method: 'GET',
+      credentials: 'include',
+      headers: { 'Accept': 'application/json' },
+    })
+  } catch (error) {
+    console.warn('Failed to fetch CSRF cookie:', error)
   }
+}
 
   /**
    * Build base request headers
