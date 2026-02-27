@@ -32,7 +32,6 @@ class APIClient {
    * Laravel sets XSRF-TOKEN (JS-readable) and laravel_session (HttpOnly).
    */
   async ensureCsrf() {
-    if (this.getCookie('XSRF-TOKEN')) return
 
     try {
       await fetch(this.csrfUrl, {
