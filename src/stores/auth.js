@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia'
 import authService from '../services/authService'
 import walletService from '../services/walletService'
-import router from '../router'
 
 export const useAuthStore = defineStore('authStore', {
   state: () => ({
@@ -60,14 +59,14 @@ export const useAuthStore = defineStore('authStore', {
             this.sessionChecked = true
             this.message = result.message
             await this.fetchWallet()
-            router.push({ path: '/dashboard' })
+            window.location.href = '/dashboard'
             return { success: true, type: 'login' }
           }
 
           // Unverified email
           if (result.status === 403) {
             this.message = result.message
-            router.push({ path: '/verify-email', query: { email: formData.email } })
+            window.location.href = `/verify-email?email=${encodeURIComponent(formData.email)}`
             return { success: false, status: 'unverified' }
           }
 
@@ -87,7 +86,7 @@ export const useAuthStore = defineStore('authStore', {
           if (result.success) {
             this.message = result.message
             this.sessionChecked = true
-            router.push({ path: '/verify-email', query: { email: formData.email } })
+            window.location.href = `/verify-email?email=${encodeURIComponent(formData.email)}`
             return { success: true, type: 'register' }
           }
 
@@ -124,7 +123,7 @@ export const useAuthStore = defineStore('authStore', {
       this.sessionChecked = false // reset so getUser() works after re-login
       this.errors = {}
       this.message = ''
-      router.push({ path: '/login' })
+      window.location.href = '/login'
     },
 
     /**
