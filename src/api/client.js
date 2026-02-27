@@ -1,6 +1,7 @@
 /**
  * HTTP Client - Core API communication layer
- * Handles all HTTP requests with automatic token injection and error handling
+ * Handles all HTTP requests with automatic CSRF handling and error handling.
+ * Uses HttpOnly session cookies (Laravel Sanctum) — no tokens in localStorage.
  */
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://primewallet.duckdns.org'
@@ -8,18 +9,11 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://primewallet.duckdn
 class APIClient {
   constructor(baseURL = API_BASE_URL) {
     this.baseURL = `${baseURL}/api`
+    this.csrfUrl = `${baseURL}/sanctum/csrf-cookie`
     this.defaultHeaders = {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
-      'X-Requested-With': 'XMLHttpRequest',
     }
-  }
-
-  /**
-   * Build request headers
-   */
-  getHeaders() {
-    return { ...this.defaultHeaders }
   }
 
   /**
@@ -27,42 +21,46 @@ class APIClient {
    */
   getCookie(name) {
     if (typeof document === 'undefined') return null
-    const encodedName = `${encodeURIComponent(name)}=`
-    const cookie = document.cookie
+    const match = document.cookie
       .split('; ')
-      .find((entry) => entry.startsWith(encodedName))
-
-    if (!cookie) return null
-    return cookie.substring(encodedName.length)
+      .find((entry) => entry.startsWith(`${name}=`))
+    return match ? decodeURIComponent(match.split('=')[1]) : null
   }
 
   /**
-   * Get CSRF cookie from Laravel Sanctum
+   * Fetch CSRF cookie from Laravel Sanctum only if not already set.
+   * Laravel sets XSRF-TOKEN (JS-readable) and laravel_session (HttpOnly).
    */
-  async getCsrfCookie() {
+  async ensureCsrf() {
+    if (this.getCookie('XSRF-TOKEN')) return
+
     try {
-      const csrfUrl = `${new URL(this.baseURL).origin}/sanctum/csrf-cookie`
-      await fetch(csrfUrl, {
+      await fetch(this.csrfUrl, {
         method: 'GET',
         credentials: 'include',
-        headers: {
-          'Accept': 'application/json',
-        }
+        headers: { 'Accept': 'application/json' },
       })
     } catch (error) {
-      console.warn('Failed to get CSRF cookie:', error)
+      console.warn('Failed to fetch CSRF cookie:', error)
     }
   }
 
   /**
-   * Handle 401 globally - session expired or not logged in
-   * Dynamically imports store to avoid circular dependency
+   * Build base request headers
+   */
+  getHeaders() {
+    return { ...this.defaultHeaders }
+  }
+
+  /**
+   * Handle 401 globally — session expired or not authenticated.
+   * Dispatches a custom event so the auth store/router can react.
    */
   handleUnauthorized() {
-  if (typeof window !== 'undefined') {
-    window.dispatchEvent(new CustomEvent('auth:unauthorized'))
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('auth:unauthorized'))
+    }
   }
-}
 
   /**
    * Make HTTP request
@@ -76,9 +74,11 @@ class APIClient {
       ...otherOptions
     } = options
 
-    // Get CSRF cookie before state-changing requests
-    if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method.toUpperCase())) {
-      await this.getCsrfCookie()
+    const isStateChanging = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method.toUpperCase())
+
+    // Ensure CSRF cookie is set before any state-changing request
+    if (isStateChanging) {
+      await this.ensureCsrf()
     }
 
     const url = `${this.baseURL}${endpoint}`
@@ -86,15 +86,15 @@ class APIClient {
     const config = {
       method,
       headers: { ...this.getHeaders(), ...headers },
-      credentials: 'include', // Important for CSRF cookies
+      credentials: 'include', // Required for session + CSRF cookies
       ...otherOptions,
     }
 
-    // Laravel expects X-XSRF-TOKEN header for state-changing requests.
-    if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method.toUpperCase())) {
+    // Attach XSRF token header for Laravel CSRF verification
+    if (isStateChanging) {
       const xsrfToken = this.getCookie('XSRF-TOKEN')
       if (xsrfToken) {
-        config.headers['X-XSRF-TOKEN'] = decodeURIComponent(xsrfToken)
+        config.headers['X-XSRF-TOKEN'] = xsrfToken
       }
     }
 
@@ -120,10 +120,9 @@ class APIClient {
       ? await response.json()
       : await response.text()
 
-     // Handle session expiry globally
     if (response.status === 401) {
       if (!skipUnauthorizedHandler) {
-        await this.handleUnauthorized()
+        this.handleUnauthorized()
       }
       const error = new Error('Unauthenticated')
       error.status = 401
@@ -135,25 +134,15 @@ class APIClient {
       const error = new Error(data.message || `HTTP ${response.status}`)
       error.status = response.status
       error.data = data
-      
-      console.error('API Response Error:', {
-        status: response.status,
-        url: response.url,
-        data
-      })
-      
+      console.error('API Error:', { status: response.status, url: response.url, data })
       throw error
     }
 
-    return {
-      status: response.status,
-      data,
-      ok: response.ok,
-    }
+    return { status: response.status, data, ok: response.ok }
   }
 
   /**
-   * Handle fetch errors
+   * Handle network/fetch errors
    */
   handleError(error) {
     console.error('API Network Error:', error)

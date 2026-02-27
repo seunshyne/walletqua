@@ -1,6 +1,7 @@
 /**
  * Authentication Service
- * Handles login, register, and logout operations
+ * Handles login, register, logout, and user profile operations.
+ * Uses HttpOnly session cookies via Laravel Sanctum — no tokens in localStorage.
  */
 
 import apiClient from '../api/client'
@@ -11,7 +12,7 @@ const AUTH_ENDPOINTS = {
   LOGOUT: '/auth/logout',
   GET_USER: '/user',
   RESEND_VERIFICATION: '/email/resend',
-};
+}
 
 export const authService = {
   /**
@@ -19,11 +20,7 @@ export const authService = {
    */
   async login(email, password) {
     try {
-      const response = await apiClient.post(AUTH_ENDPOINTS.LOGIN, {
-        email,
-        password,
-      })
-
+      const response = await apiClient.post(AUTH_ENDPOINTS.LOGIN, { email, password })
       return {
         success: true,
         user: response.data.user,
@@ -34,7 +31,7 @@ export const authService = {
       return {
         success: false,
         error: error.data?.errors || error.data?.error || { general: error.message },
-        message: error.data?.message || '',
+        message: error.data?.message || error.message || 'Login failed',
         status: error.status,
       }
     }
@@ -51,7 +48,6 @@ export const authService = {
         password,
         password_confirmation: passwordConfirmation,
       })
-
       return {
         success: true,
         message: response.data.message || 'Registration successful. Please verify your email.',
@@ -61,26 +57,32 @@ export const authService = {
       return {
         success: false,
         error: error.data?.errors || error.data?.error || { general: error.message },
-        message: error.data?.message || '',
+        message: error.data?.message || error.message || 'Registration failed',
+        status: error.status,
       }
     }
   },
 
   /**
-   * Logout current user
+   * Logout current user.
+   * Always treated as successful on the frontend — session may already
+   * be invalidated on the backend regardless of the response.
    */
   async logout() {
     try {
       await apiClient.post(AUTH_ENDPOINTS.LOGOUT)
-      return { success: true } // Assume logout is successful even if API call fails
     } catch (error) {
-      console.error('Logout error:', error)
-      return { success: false, error }
+      // Log but don't block — still clear local state
+      console.warn('Logout API call failed (session may already be expired):', error.message)
     }
+    return { success: true }
   },
 
   /**
-   * Get current user profile
+   * Get current authenticated user.
+   * Returns success: false (not an error) when unauthenticated (401).
+   * skipUnauthorizedHandler prevents the global redirect from firing
+   * during the initial auth check on app load.
    */
   async getCurrentUser() {
     try {
@@ -92,8 +94,13 @@ export const authService = {
         user: response.data.user || response.data,
       }
     } catch (error) {
+      // 401 = not logged in, anything else = real error
+      if (error.status === 401) {
+        return { success: false, unauthenticated: true }
+      }
       return {
         success: false,
+        unauthenticated: false,
         error: error.message,
       }
     }
@@ -112,8 +119,8 @@ export const authService = {
     } catch (error) {
       return {
         success: false,
-        error: error.message,
-        message: error.data?.message || '',
+        error: error.data?.errors || { general: error.message },
+        message: error.data?.message || error.message || 'Failed to resend verification email',
       }
     }
   },

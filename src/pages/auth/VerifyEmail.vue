@@ -9,6 +9,8 @@ const authStore = useAuthStore()
 
 const email = route.query.email || ''
 const message = ref('')
+const isError = ref(false)
+const isResending = ref(false)
 const cooldown = ref(0)
 
 let timer = null
@@ -19,17 +21,22 @@ const goToLogin = () => {
 
 const resend = async () => {
   if (!email) {
-    message.value = 'Email not found. Please login again.'
+    message.value = 'Email not found. Please go back and login again.'
+    isError.value = true
     return
   }
 
-  if (cooldown.value > 0) return
+  if (cooldown.value > 0 || isResending.value) return
+
+  isResending.value = true
+  isError.value = false
+  message.value = ''
 
   try {
-    message.value = ''
     const msg = await authStore.resendVerification(email)
     message.value = msg || 'Verification email resent successfully.'
 
+    // Start cooldown
     cooldown.value = 60
     timer = setInterval(() => {
       cooldown.value--
@@ -40,6 +47,9 @@ const resend = async () => {
     }, 1000)
   } catch (err) {
     message.value = err.message || 'Failed to resend verification email.'
+    isError.value = true
+  } finally {
+    isResending.value = false
   }
 }
 
@@ -59,7 +69,7 @@ onUnmounted(() => {
         <h5 class="q-mt-md q-mb-sm">Verify your email</h5>
 
         <p class="text-grey-7">
-          We’ve sent a verification link to your email address.
+          We've sent a verification link to <strong>{{ email }}</strong>.
         </p>
 
         <p class="text-grey-6 text-caption">
@@ -67,8 +77,8 @@ onUnmounted(() => {
         </p>
       </q-card-section>
 
-      <q-card-section v-if="message" class="text-center">
-        <q-banner dense class="bg-grey-2 text-primary">
+      <q-card-section v-if="message" class="text-center q-pt-none">
+        <q-banner dense :class="isError ? 'bg-red-1 text-negative' : 'bg-grey-2 text-primary'">
           {{ message }}
         </q-banner>
       </q-card-section>
@@ -78,7 +88,8 @@ onUnmounted(() => {
           unelevated
           color="deep-purple-6"
           text-color="white"
-          :disable="cooldown > 0"
+          :disable="cooldown > 0 || isResending"
+          :loading="isResending"
           @click="resend"
           label="Resend verification email"
         />
@@ -91,7 +102,7 @@ onUnmounted(() => {
         />
       </q-card-actions>
 
-      <q-card-section v-if="cooldown > 0" class="text-center text-caption">
+      <q-card-section v-if="cooldown > 0" class="text-center text-caption q-pt-none">
         You can resend in {{ cooldown }} seconds
       </q-card-section>
     </q-card>
