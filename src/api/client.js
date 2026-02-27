@@ -75,6 +75,9 @@ class APIClient {
 
     const isStateChanging = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method.toUpperCase())
 
+    console.log('isStateChanging:', isStateChanging, method) // temporary debug
+
+
     // Ensure CSRF cookie is set before any state-changing request
     if (isStateChanging) {
       await this.ensureCsrf()
