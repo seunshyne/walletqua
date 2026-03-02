@@ -54,7 +54,20 @@ export const useAuthStore = defineStore('authStore', {
           const result = await authService.login(formData.email, formData.password)
 
           if (result.success) {
-            this.user = result.user
+            // Verify that Laravel actually established the session cookie.
+            const sessionResult = await authService.getCurrentUser()
+            if (!sessionResult.success) {
+              this.user = null
+              this.wallet = null
+              this.sessionChecked = true
+              this.errors = {
+                general:
+                  'Login response received, but session cookie was not established. Check Sanctum/CORS/session config.',
+              }
+              return { success: false, status: 'session_not_established' }
+            }
+
+            this.user = sessionResult.user
             this.wallet = result.wallet || null
             this.sessionChecked = true
             this.message = result.message
