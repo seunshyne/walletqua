@@ -83,6 +83,14 @@ export const useAuthStore = defineStore('authStore', {
             return { success: false, status: 'unverified' }
           }
 
+          if (result.status === 419) {
+            this.errors = result.error || {
+              general: 'Session security check failed. Please refresh and try again.',
+            }
+            this.message = result.message || 'Session security check failed. Please refresh and try again.'
+            return { success: false, status: 419 }
+          }
+
           this.errors = result.error
           this.message = result.message
           return { success: false }

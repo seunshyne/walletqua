@@ -32,16 +32,29 @@ class APIClient {
    * Laravel sets XSRF-TOKEN (JS-readable) and laravel_session (HttpOnly).
    */
   async ensureCsrf() {
-  try {
-    await fetch(this.csrfUrl, {
+    const response = await fetch(this.csrfUrl, {
       method: 'GET',
       credentials: 'include',
       headers: { 'Accept': 'application/json' },
     })
-  } catch (error) {
-    console.warn('Failed to fetch CSRF cookie:', error)
+
+    if (!response.ok) {
+      const error = new Error(`Failed to fetch CSRF cookie: HTTP ${response.status}`)
+      error.status = response.status
+      error.url = this.csrfUrl
+      throw error
+    }
+
+    const xsrfToken = this.getCookie('XSRF-TOKEN')
+    if (!xsrfToken) {
+      const error = new Error(
+        'CSRF cookie was not set. Check CORS/SameSite/Secure/domain config.'
+      )
+      error.status = response.status
+      error.url = this.csrfUrl
+      throw error
+    }
   }
-}
 
   /**
    * Build base request headers
@@ -72,7 +85,8 @@ class APIClient {
       ...otherOptions
     } = options
 
-    const isStateChanging = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method.toUpperCase())
+    const normalizedMethod = method.toUpperCase()
+    const isStateChanging = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(normalizedMethod)
 
     // Ensure CSRF cookie is set before any state-changing request
     if (isStateChanging) {
@@ -82,7 +96,7 @@ class APIClient {
     const url = `${this.baseURL}${endpoint}`
 
     const config = {
-      method,
+      method: normalizedMethod,
       headers: { ...this.getHeaders(), ...headers },
       credentials: 'include', // Required for session + CSRF cookies
       ...otherOptions,
@@ -91,9 +105,14 @@ class APIClient {
     // Attach XSRF token header for Laravel CSRF verification
     if (isStateChanging) {
       const xsrfToken = this.getCookie('XSRF-TOKEN')
-      if (xsrfToken) {
-        config.headers['X-XSRF-TOKEN'] = xsrfToken
+      if (!xsrfToken) {
+        const error = new Error(
+          'CSRF cookie was not set. Check CORS/SameSite/Secure/domain config.'
+        )
+        error.url = url
+        throw error
       }
+      config.headers['X-XSRF-TOKEN'] = xsrfToken
     }
 
     if (body) {
@@ -104,7 +123,7 @@ class APIClient {
       const response = await fetch(url, config)
       return this.handleResponse(response, { skipUnauthorizedHandler })
     } catch (error) {
-      return this.handleError(error)
+      return this.handleError(error, url)
     }
   }
 
@@ -125,6 +144,7 @@ class APIClient {
       const error = new Error('Unauthenticated')
       error.status = 401
       error.data = data
+      error.url = response.url
       throw error
     }
 
@@ -132,6 +152,7 @@ class APIClient {
       const error = new Error(data.message || `HTTP ${response.status}`)
       error.status = response.status
       error.data = data
+      error.url = response.url
       console.error('API Error:', { status: response.status, url: response.url, data })
       throw error
     }
@@ -142,9 +163,12 @@ class APIClient {
   /**
    * Handle network/fetch errors
    */
-  handleError(error) {
+  handleError(error, requestUrl) {
     console.error('API Network Error:', error)
     const apiError = new Error(error.message || 'Network error')
+    apiError.status = error.status
+    apiError.data = error.data
+    apiError.url = error.url || requestUrl
     apiError.originalError = error
     throw apiError
   }

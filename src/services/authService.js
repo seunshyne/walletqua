@@ -28,6 +28,16 @@ export const authService = {
         message: response.data.message || 'Login successful',
       }
     } catch (error) {
+      if (error.status === 419) {
+        const message = 'Session security check failed. Please refresh and try again.'
+        return {
+          success: false,
+          status: 419,
+          message,
+          error: { general: message },
+        }
+      }
+
       return {
         success: false,
         error: error.data?.errors || error.data?.error || { general: error.message },
