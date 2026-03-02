@@ -1,7 +1,7 @@
 /**
  * Authentication Service
  * Handles login, register, logout, and user profile operations.
- * Uses HttpOnly session cookies via Laravel Sanctum — no tokens in localStorage.
+ * Uses HttpOnly session cookies via Laravel Sanctum - no tokens in localStorage.
  */
 
 import apiClient from '../api/client'
@@ -75,17 +75,20 @@ export const authService = {
 
   /**
    * Logout current user.
-   * Always treated as successful on the frontend — session may already
-   * be invalidated on the backend regardless of the response.
+   * Must succeed on the backend to fully invalidate the session cookie.
    */
   async logout() {
     try {
       await apiClient.post(AUTH_ENDPOINTS.LOGOUT)
+      return { success: true }
     } catch (error) {
-      // Log but don't block — still clear local state
-      console.warn('Logout API call failed (session may already be expired):', error.message)
+      return {
+        success: false,
+        status: error.status,
+        message: error.data?.message || error.message || 'Logout failed',
+        error: error.data?.errors || error.data?.error || { general: error.message },
+      }
     }
-    return { success: true }
   },
 
   /**

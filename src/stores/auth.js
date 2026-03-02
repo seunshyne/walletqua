@@ -19,7 +19,7 @@ export const useAuthStore = defineStore('authStore', {
      */
     async getUser() {
       if (this.sessionChecked) {
-        // Session checked but no wallet yet — try fetching wallet
+        // Session checked but no wallet yet - try fetching wallet
         if (this.user && !this.wallet?.id) {
           await this.fetchWallet()
         }
@@ -43,7 +43,7 @@ export const useAuthStore = defineStore('authStore', {
     },
 
     /**
-     * Authenticate user — login or register
+     * Authenticate user - login or register
      */
     async authenticate(apiRoute, formData) {
       this.errors = {}
@@ -138,13 +138,22 @@ export const useAuthStore = defineStore('authStore', {
      * Logout current user and reset all auth state
      */
     async logout() {
-      await authService.logout() // always succeeds — see authService
+      const result = await authService.logout()
+      if (!result.success) {
+        this.errors = result.error || {
+          general: result.message || 'Logout failed. Please try again.',
+        }
+        this.message = result.message || 'Logout failed. Please try again.'
+        return { success: false, status: result.status }
+      }
+
       this.user = null
       this.wallet = null
       this.sessionChecked = false // reset so getUser() works after re-login
       this.errors = {}
       this.message = ''
       window.location.href = '/'
+      return { success: true }
     },
 
     /**
