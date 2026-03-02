@@ -144,7 +144,7 @@ export const useAuthStore = defineStore('authStore', {
       this.sessionChecked = false // reset so getUser() works after re-login
       this.errors = {}
       this.message = ''
-      window.location.href = '/login'
+      window.location.href = '/'
     },
 
     /**

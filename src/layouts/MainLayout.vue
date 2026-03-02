@@ -163,18 +163,15 @@
 </template>
 
 <script setup>
-import { ref, watch, computed, onMounted, getCurrentInstance } from "vue";
+import { ref, computed, onMounted, getCurrentInstance } from "vue";
 import { useAuthStore } from "src/stores/auth";
 import { storeToRefs } from 'pinia'
-import { useRouter } from 'vue-router' 
-
-const router = useRouter();
 const authStore = useAuthStore();
 const { proxy } = getCurrentInstance();
 
 const { user, isAuthenticated } = storeToRefs(authStore);
 const walletAddress = computed(() => authStore.getWalletAddress);
-const logoDestination = computed(() => (isAuthenticated.value ? { name: 'dashboard' } : { path: '/' }));
+const logoDestination = computed(() => ({ path: '/' }));
 
 const leftDrawerOpen = ref(false);
 
@@ -185,15 +182,8 @@ onMounted(() => {
   }
 });
 
-watch(isAuthenticated, (Val) => {
-  if (Val) {
-    router.replace({ name: 'dashboard' });
-  }
-}, { immediate: true });
-
 const logout = async () => {
   await authStore.logout();
-  await router.push({ path: '/' });
 };
 
 function toggleLeftDrawer() {
