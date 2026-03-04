@@ -16,6 +16,10 @@ const formData = reactive({
   password: '',
 })
 
+const passwordVisibility = reactive({
+  showPassword: false,
+})
+
 const handleSubmit = async () => {
   // router.push is handled inside the store's authenticate() action
   await authStore.authenticate('login', formData)
@@ -92,13 +96,20 @@ onMounted(() => {
                 square
                 clearable
                 v-model="formData.password"
-                type="password"
+                :type="passwordVisibility.showPassword ? 'text' : 'password'"
                 label="Password"
                 :error="!!errors.password"
                 :error-message="errors.password?.[0]"
               >
                 <template v-slot:prepend>
                   <q-icon name="lock" />
+                </template>
+                <template v-slot:append>
+                  <q-icon
+                    :name="passwordVisibility.showPassword ? 'visibility_off' : 'visibility'"
+                    class="cursor-pointer"
+                    @click="passwordVisibility.showPassword = !passwordVisibility.showPassword"
+                  />
                 </template>
               </q-input>
 

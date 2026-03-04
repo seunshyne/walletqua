@@ -24,7 +24,7 @@
         <template v-if="isAuthenticated">
           <div class="user-info q-mr-md">
             <div class="text-subtitle2">{{ user?.name }}</div>
-            <div class="text-caption text-grey wallet-address">
+            <div class="text-caption text-white wallet-address">
               📍 {{ walletAddress }}
             </div>
           </div>
@@ -171,7 +171,9 @@ const { proxy } = getCurrentInstance();
 
 const { user, isAuthenticated } = storeToRefs(authStore);
 const walletAddress = computed(() => authStore.getWalletAddress);
-const logoDestination = computed(() => ({ path: '/' }));
+const logoDestination = computed(() => {
+  return isAuthenticated.value ? { path: 'dashboard' } : { path: '/' };
+});
 
 const leftDrawerOpen = ref(false);
 
@@ -183,7 +185,17 @@ onMounted(() => {
 });
 
 const logout = async () => {
-  await authStore.logout();
+  const result = await authStore.logout();
+  if (!result?.success) {
+    const message = authStore.message || 'Logout failed. Please try again.'
+    console.error('Logout action failed:', { result, message })
+    if (proxy?.$q?.notify) {
+      proxy.$q.notify({
+        type: 'negative',
+        message,
+      })
+    }
+  }
 };
 
 function toggleLeftDrawer() {

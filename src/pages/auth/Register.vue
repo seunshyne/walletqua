@@ -33,6 +33,11 @@ const emailValidation = reactive({
   isValid: false,
 })
 
+const passwordVisibility = reactive({
+  showPassword: false,
+  showPasswordConfirmation: false,
+})
+
 const passwordConfirmationMatch = computed(() =>
   formData.password_confirmation !== '' &&
   formData.password === formData.password_confirmation
@@ -119,13 +124,20 @@ onMounted(() => {
                 square
                 clearable
                 v-model="formData.password"
-                type="password"
+                :type="passwordVisibility.showPassword ? 'text' : 'password'"
                 label="Password"
                 :error="!!errors.password"
                 :error-message="errors.password?.[0]"
               >
                 <template v-slot:prepend>
                   <q-icon name="lock" />
+                </template>
+                <template v-slot:append>
+                  <q-icon
+                    :name="passwordVisibility.showPassword ? 'visibility_off' : 'visibility'"
+                    class="cursor-pointer"
+                    @click="passwordVisibility.showPassword = !passwordVisibility.showPassword"
+                  />
                 </template>
               </q-input>
 
@@ -159,13 +171,20 @@ onMounted(() => {
                 square
                 clearable
                 v-model="formData.password_confirmation"
-                type="password"
+                :type="passwordVisibility.showPasswordConfirmation ? 'text' : 'password'"
                 label="Confirm Password"
                 :error="!!formData.password_confirmation && !passwordConfirmationMatch"
                 :error-message="formData.password_confirmation && !passwordConfirmationMatch ? 'Passwords do not match' : ''"
               >
                 <template v-slot:prepend>
                   <q-icon name="lock" />
+                </template>
+                <template v-slot:append>
+                  <q-icon
+                    :name="passwordVisibility.showPasswordConfirmation ? 'visibility_off' : 'visibility'"
+                    class="cursor-pointer"
+                    @click="passwordVisibility.showPasswordConfirmation = !passwordVisibility.showPasswordConfirmation"
+                  />
                 </template>
               </q-input>
 

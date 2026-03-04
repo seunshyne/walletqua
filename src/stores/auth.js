@@ -140,6 +140,7 @@ export const useAuthStore = defineStore('authStore', {
     async logout() {
       const result = await authService.logout()
       if (!result.success) {
+        console.error('Logout failed:', result)
         this.errors = result.error || {
           general: result.message || 'Logout failed. Please try again.',
         }
