@@ -1,76 +1,160 @@
 <template>
-  <q-page class="dashboard-responsive">
-    <q-row class="q-gutter-md" align="center" justify="center">
-      <q-col cols="12" sm="10" md="8" lg="6" xl="5">
-        <q-card class="my-card dashboard-card-responsive">
-          <q-card-section class="dashboard-balance-section">
-            <div class="dashboard-balance-label">Balance</div>
-            <div class="dashboard-balance-value">
-              <q-icon name="account_balance_wallet" color="primary" size="32px" class="q-mr-sm" />
-              <span class="dashboard-amount">{{ authStore.getWalletBalance }}</span>
-              <span class="dashboard-currency">{{ authStore.getWalletCurrency }}</span>
+  <q-page class="dash-page">
+    <div class="dash-shell">
+      <aside class="dash-sidebar">
+        <div class="brand">
+          <div class="brand-badge">
+            <span class="brand-dot"></span>
+            <span class="brand-core"></span>
+          </div>
+          <div>
+            <div class="brand-name">PrimeWallet</div>
+            <div class="brand-sub">Premium Finance</div>
+          </div>
+        </div>
+
+        <nav class="nav">
+          <router-link to="/dashboard" class="nav-item is-active">
+            <q-icon name="grid_view" />
+            <span>Dashboard</span>
+          </router-link>
+          <router-link to="/history" class="nav-item">
+            <q-icon name="history" />
+            <span>History</span>
+          </router-link>
+          <router-link to="/send" class="nav-item">
+            <q-icon name="send" />
+            <span>Send</span>
+          </router-link>
+          <router-link to="/receive" class="nav-item">
+            <q-icon name="download" />
+            <span>Receive</span>
+          </router-link>
+          <router-link to="/analytics" class="nav-item">
+            <q-icon name="leaderboard" />
+            <span>Analytics</span>
+          </router-link>
+        </nav>
+
+        <div class="sidebar-footer">
+          <div class="user-chip">
+            <div class="user-avatar">AC</div>
+            <div>
+              <div class="user-name">{{ authStore.user?.name || 'Alex Carter' }}</div>
+              <div class="user-tier">Pro Member</div>
             </div>
-          </q-card-section>
-          <q-card-actions align="right" class="dashboard-actions-responsive">
-            <q-btn color="primary" label="Send" @click="() => router.push({ name: 'send' })" />
-            <q-btn color="secondary" label="Receive" @click="receiveMoney" />
-          </q-card-actions>
-        </q-card>
-      </q-col>
-    </q-row>
-    <q-row class="q-gutter-md q-mt-md" align="center" justify="center">
-      <q-col cols="12" sm="10" md="8" lg="6" xl="5">
-        <q-table
-          :rows="recentTransactions"
-          :columns="columns"
-          row-key="id"
-          title="Recent Transactions"
-          class="dashboard-table-responsive"
-          :loading="transactionStore.loading"
-          :rows-per-page-options="[5]"
-          :pagination="{ rowsPerPage: 5 }"
-          flat
-        >
-          <template v-slot:body-cell-counterparty="props">
-            <q-td :props="props">
-              {{
-                props.row.type === 'debit'
-                  ? `Sent to ${props.row.counterparty_name || 'Unknown'}`
-                  : `Received from ${props.row.counterparty_name || 'Unknown'}`
-              }}
-            </q-td>
-          </template>
+          </div>
+          <button class="logout-btn">
+            <q-icon name="logout" />
+            <span>Logout</span>
+          </button>
+        </div>
+      </aside>
 
-          <template v-slot:body-cell-status="props">
-            <q-td :props="props">
-              <q-badge
-                :label="props.row.status || 'completed'"
-                :color="getStatusColor(props.row.status || 'completed')"
-                text-color="white"
-              />
-            </q-td>
-          </template>
+      <main class="dash-main">
+        <header class="dash-topbar">
+          <div class="greeting">
+            Good morning, <span>{{ authStore.user?.name || 'Alex' }}</span>
+          </div>
+          <div class="top-actions">
+            <q-btn dense flat round icon="notifications" class="icon-btn" />
+            <q-btn dense flat round icon="search" class="icon-btn" />
+          </div>
+        </header>
 
-          <template v-slot:body-cell-type="props">
-            <q-td :props="props">
-              <q-badge
-                :label="props.row.type || 'unknown'"
-                :color="props.row.type === 'debit' ? 'negative' : 'positive'"
-                text-color="white"
-              />
-            </q-td>
-          </template>
+        <section class="balance-card">
+          <div>
+            <div class="balance-label">+2.4% this month</div>
+            <div class="balance-amount">{{ formatCurrency(authStore.getWalletBalance) }}</div>
+            <div class="balance-sub">Total combined balance</div>
+          </div>
+          <div class="balance-actions">
+            <q-btn class="primary-btn" label="View Details" no-caps />
+            <q-btn class="ghost-btn" round dense icon="more_horiz" />
+          </div>
+        </section>
 
-          <template v-slot:body-cell-amount="props">
-            <q-td :props="props">
-              <span :class="props.row.type === 'debit' ? 'text-negative' : 'text-positive'">
-                {{ props.row.type === 'debit' ? '-' : '+' }}{{ formatCurrency(props.row.amount) }}
-              </span>
-            </q-td>
-          </template>
-        </q-table>
-      </q-col>
-    </q-row>
+        <section class="quick-actions">
+          <button class="quick-card" @click="() => router.push({ name: 'send' })">
+            <div class="quick-icon">
+              <q-icon name="north_east" />
+            </div>
+            <div>Send</div>
+          </button>
+          <button class="quick-card" @click="receiveMoney">
+            <div class="quick-icon">
+              <q-icon name="south_west" />
+            </div>
+            <div>Receive</div>
+          </button>
+          <button class="quick-card">
+            <div class="quick-icon">
+              <q-icon name="payments" />
+            </div>
+            <div>Pay Bills</div>
+          </button>
+          <button class="quick-card">
+            <div class="quick-icon">
+              <q-icon name="add" />
+            </div>
+            <div>Top-up</div>
+          </button>
+        </section>
+
+        <section class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-title">Monthly Income</div>
+            <div class="stat-value">$4,200 <span class="stat-change up">+12%</span></div>
+            <div class="stat-bar">
+              <span class="bar-fill teal"></span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-title">Total Expenses</div>
+            <div class="stat-value">$2,150 <span class="stat-change down">-5%</span></div>
+            <div class="stat-bar">
+              <span class="bar-fill rose"></span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-title">Savings Rate</div>
+            <div class="stat-value">15% <span class="stat-change up">+2%</span></div>
+            <div class="stat-bar">
+              <span class="bar-fill purple"></span>
+            </div>
+          </div>
+        </section>
+
+        <section class="transactions">
+          <div class="transactions-header">
+            <div>Recent Transactions</div>
+            <button class="link-btn">View all</button>
+          </div>
+
+          <div class="transactions-list">
+            <div v-for="tx in recentTransactions" :key="tx.id" class="tx-row">
+              <div class="tx-icon">
+                <q-icon :name="tx.type === 'debit' ? 'payments' : 'account_balance_wallet'" />
+              </div>
+              <div class="tx-info">
+                <div class="tx-title">
+                  {{ tx.description || tx.counterparty_name || 'Transaction' }}
+                </div>
+                <div class="tx-sub">
+                  {{ formatDate(tx.date || tx.created_at) }} • {{ tx.type || 'transfer' }}
+                </div>
+              </div>
+              <div class="tx-amount" :class="tx.type === 'debit' ? 'negative' : 'positive'">
+                {{ tx.type === 'debit' ? '-' : '+' }}{{ formatCurrency(tx.amount) }}
+              </div>
+              <div class="tx-badge" :class="tx.type === 'debit' ? 'debit' : 'credit'">
+                {{ tx.type === 'debit' ? 'DEBIT' : 'CREDIT' }}
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
   </q-page>
 </template>
 
@@ -167,113 +251,474 @@ function receiveMoney() {
  </script>
 
 <style scoped>
-.dashboard-card-responsive {
-  padding: 32px;
+.dash-page {
+  min-height: 100vh;
+  background: #0f1c2e;
+  color: #d7e3f4;
+  font-family: "Plus Jakarta Sans", "Manrope", "Segoe UI", sans-serif;
 }
-/* Use a deep blue background for strong contrast */
-.dashboard-balance-section {
-  background: linear-gradient(90deg, #0d1b2a 0%, #1b263b 100%);
-  border-radius: 10px !important;
-  box-shadow: 0 2px 12px rgba(25, 118, 210, 0.08);
-  padding: 24px 24px 18px 24px;
-  margin-bottom: 18px;
-  color: #fff;
-  text-align: center;
+
+.dash-shell {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  min-height: 100vh;
 }
-.dashboard-balance-label {
-  font-size: 1.1rem;
-  font-weight: 500;
-  opacity: 0.92;
-  margin-bottom: 8px;
-  letter-spacing: 0.5px;
-  
+
+.dash-sidebar {
+  padding: 28px 22px;
+  background: #0b1626;
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
 }
-.dashboard-balance-value {
+
+.brand {
   display: flex;
   align-items: center;
-  justify-content: center;
-  font-size: 2.2rem;
-  font-weight: bold;
-  letter-spacing: 1px;
-  margin-top: 2px;
+  gap: 12px;
 }
-.dashboard-amount {
-  color: #fff;
-  font-size: 2.2rem;
-  font-weight: bold;
-  margin-right: 8px;
+
+.brand-badge {
+  width: 46px;
+  height: 46px;
+  border-radius: 16px;
+  background: radial-gradient(circle at top left, #9f4dff, #5d2bff);
+  display: grid;
+  place-items: center;
+  position: relative;
+}
+
+.brand-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 6px;
+  background: #ffffff;
+}
+
+.brand-core {
+  width: 22px;
+  height: 22px;
+  border-radius: 8px;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  position: absolute;
+}
+
+.brand-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.brand-sub {
+  font-size: 0.8rem;
+  color: #9aa9c4;
+}
+
+.nav {
+  display: grid;
+  gap: 10px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  color: #b2c1da;
+  text-decoration: none;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.nav-item:hover {
+  background: rgba(123, 96, 255, 0.12);
+  color: #ffffff;
+}
+
+.nav-item.is-active {
+  background: rgba(123, 96, 255, 0.2);
+  color: #d7c6ff;
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  display: grid;
+  gap: 16px;
+}
+
+.user-chip {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-avatar {
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
-  text-shadow: 0 2px 8px rgba(0,0,0,0.18);
-  background: rgba(0,0,0,0.18);
-  padding: 2px 12px;
-  display: inline-block;
+  background: #1b2a40;
+  display: grid;
+  place-items: center;
+  font-weight: 600;
+  color: #ffffff;
 }
-.dashboard-currency {
-  color: #e3f2fd;
-  font-size: 1.2rem;
-  font-weight: 500;
-  margin-left: 2px;
-  opacity: 0.85;
+
+.user-name {
+  font-weight: 600;
+  color: #ffffff;
 }
-.dashboard-actions-responsive {
-  padding-right: 24px;
-  padding-bottom: 8px;
+
+.user-tier {
+  font-size: 0.75rem;
+  color: #8ea2c2;
 }
-.dashboard-table-responsive {
+
+.logout-btn {
+  border: none;
+  background: transparent;
+  color: #ff6b8b;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.dash-main {
+  padding: 28px 32px 40px;
+}
+
+.dash-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.greeting {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.greeting span {
+  color: #d7c6ff;
+}
+
+.top-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.icon-btn {
+  color: #c7d2e8;
+}
+
+.balance-card {
+  margin-top: 22px;
+  background: #18314b;
+  border-radius: 20px;
+  padding: 24px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+.balance-label {
+  color: #5de0e6;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.balance-amount {
+  font-size: 2.4rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 4px 0 6px;
+}
+
+.balance-sub {
+  color: #9ab0cc;
+}
+
+.balance-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.primary-btn {
+  background: linear-gradient(135deg, #a855f7, #6d28d9);
+  color: #ffffff;
+  border-radius: 14px;
+  padding: 8px 20px;
+}
+
+.ghost-btn {
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+}
+
+.quick-actions {
   margin-top: 24px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
 }
 
-@media (max-width: 599px) {
-  .dashboard-card-responsive {
-    padding: 8px !important;
+.quick-card {
+  background: #152a42;
+  border-radius: 18px;
+  padding: 18px;
+  color: #ffffff;
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.quick-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(8, 15, 27, 0.3);
+}
+
+.quick-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 16px;
+  background: rgba(94, 234, 212, 0.2);
+  display: grid;
+  place-items: center;
+  color: #5eead4;
+}
+
+.stats-grid {
+  margin-top: 24px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.stat-card {
+  background: #152a42;
+  border-radius: 18px;
+  padding: 18px 20px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.stat-title {
+  color: #9bb1cc;
+  font-size: 0.85rem;
+  margin-bottom: 8px;
+}
+
+.stat-value {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stat-change {
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.stat-change.up {
+  color: #5eead4;
+}
+
+.stat-change.down {
+  color: #fb7185;
+}
+
+.stat-bar {
+  margin-top: 12px;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  display: block;
+  border-radius: 999px;
+}
+
+.bar-fill.teal {
+  width: 65%;
+  background: #5eead4;
+}
+
+.bar-fill.rose {
+  width: 45%;
+  background: #fb7185;
+}
+
+.bar-fill.purple {
+  width: 30%;
+  background: #a855f7;
+}
+
+.transactions {
+  margin-top: 26px;
+  background: #152a42;
+  border-radius: 20px;
+  padding: 20px 22px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.transactions-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 16px;
+}
+
+.link-btn {
+  background: transparent;
+  border: none;
+  color: #c084fc;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.transactions-list {
+  display: grid;
+  gap: 14px;
+}
+
+.tx-row {
+  display: grid;
+  grid-template-columns: 44px 1fr auto auto;
+  gap: 12px;
+  align-items: center;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.tx-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.tx-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  background: rgba(94, 234, 212, 0.15);
+  display: grid;
+  place-items: center;
+  color: #5eead4;
+}
+
+.tx-title {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.tx-sub {
+  color: #8ea2c2;
+  font-size: 0.8rem;
+}
+
+.tx-amount {
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.tx-amount.negative {
+  color: #fb7185;
+}
+
+.tx-amount.positive {
+  color: #5eead4;
+}
+
+.tx-badge {
+  font-size: 0.7rem;
+  padding: 4px 8px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.tx-badge.debit {
+  background: rgba(251, 113, 133, 0.15);
+  color: #fb7185;
+}
+
+.tx-badge.credit {
+  background: rgba(94, 234, 212, 0.15);
+  color: #5eead4;
+}
+
+@media (max-width: 1100px) {
+  .dash-shell {
+    grid-template-columns: 1fr;
   }
-  .dashboard-balance-section {
-    padding: 12px 6px 8px 6px !important;
-    border-radius: 10px !important;
-    margin-bottom: 10px !important;
+
+  .dash-sidebar {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
   }
-  .dashboard-balance-label {
-    font-size: 0.95rem !important;
+
+  .nav {
+    grid-auto-flow: column;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
   }
-  .dashboard-balance-value, .dashboard-amount {
-    font-size: 1.2rem !important;
-  }
-  .dashboard-currency {
-    font-size: 0.95rem !important;
-  }
-  .dashboard-actions-responsive {
-    padding-right: 4px !important;
-    padding-bottom: 4px !important;
-  }
-  .dashboard-table-responsive {
-    margin-top: 8px !important;
+
+  .sidebar-footer {
+    display: none;
   }
 }
 
-@media (min-width: 600px) and (max-width: 1023px) {
-  .dashboard-card-responsive {
-    padding: 20px !important;
+@media (max-width: 900px) {
+  .quick-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  .dashboard-balance-section {
-    padding: 18px 12px 12px 12px !important;
-    border-radius: 10px !important;
-    margin-bottom: 14px !important;
+
+  .stats-grid {
+    grid-template-columns: 1fr;
   }
-  .dashboard-balance-label {
-    font-size: 1.05rem !important;
+
+  .tx-row {
+    grid-template-columns: 44px 1fr;
+    grid-auto-rows: auto;
+    row-gap: 6px;
   }
-  .dashboard-balance-value, .dashboard-amount {
-    font-size: 1.5rem !important;
+
+  .tx-amount,
+  .tx-badge {
+    justify-self: start;
   }
-  .dashboard-currency {
-    font-size: 1.05rem !important;
+}
+
+@media (max-width: 700px) {
+  .dash-main {
+    padding: 20px 18px 32px;
   }
-  .dashboard-actions-responsive {
-    padding-right: 12px !important;
-    padding-bottom: 6px !important;
+
+  .balance-card {
+    flex-direction: column;
+    align-items: flex-start;
   }
-  .dashboard-table-responsive {
-    margin-top: 16px !important;
+
+  .nav {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    row-gap: 8px;
   }
 }
 </style>
