@@ -32,7 +32,7 @@
 
       <!-- Buttons -->
       <transition name="slide-left">
-        <div v-if="show" class="row justify-center q-gutter-md">
+        <div v-if="show" class="row justify-center q-gutter-md home-actions">
           <q-btn
             label="Login"
             color="white"
@@ -124,5 +124,28 @@ onMounted(() => {
 .home-page > div {
   position: relative;
   z-index: 2;
+}
+
+@media (max-width: 600px) {
+  .home-page {
+    padding: 16px 12px;
+  }
+
+  .home-page h1 {
+    font-size: 1.75rem;
+  }
+
+  .home-page .text-subtitle1 {
+    font-size: 0.95rem;
+  }
+
+  .home-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .home-actions :deep(.q-btn) {
+    width: 100%;
+  }
 }
 </style>

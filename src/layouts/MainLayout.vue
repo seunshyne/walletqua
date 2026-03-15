@@ -209,29 +209,8 @@ function closeLeftDrawer() {
 
 <style scoped>
 .main-layout {
-  background-image: url('/images/wallet-bg.jpg');
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
-  background-repeat: no-repeat;
   background-color: #1a1a1a;
   min-height: 100vh;
-}
-
-.main-layout::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-image: url('/images/wallet-bg.jpg');
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
-  background-repeat: no-repeat;
-  z-index: -1;
-  pointer-events: none;
 }
 
 .nav-link {

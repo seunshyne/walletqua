@@ -721,4 +721,30 @@ function receiveMoney() {
     row-gap: 8px;
   }
 }
+
+
+@media (max-width: 560px) {
+  .dash-topbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .quick-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .dash-sidebar {
+    padding: 16px;
+    gap: 16px;
+  }
+
+  .nav {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .balance-card {
+    padding: 18px;
+  }
+}
 </style>

@@ -60,10 +60,10 @@ onUnmounted(() => {
 
 <template>
   <q-page
-    class="window-height window-width row justify-center items-center"
+    class="window-height window-width row justify-center items-center verify-page"
     style="background: linear-gradient(#8274c5, #5a4a9f)"
   >
-    <q-card square class="shadow-24 q-pa-lg" style="width: 360px">
+    <q-card square class="shadow-24 q-pa-lg verify-card">
       <q-card-section class="text-center">
         <q-icon name="mark_email_read" size="56px" color="deep-purple-7" />
         <h5 class="q-mt-md q-mb-sm">Verify your email</h5>
@@ -108,3 +108,19 @@ onUnmounted(() => {
     </q-card>
   </q-page>
 </template>
+
+<style scoped>
+.verify-card {
+  width: 360px;
+}
+
+@media (max-width: 600px) {
+  .verify-page {
+    padding: 20px 12px;
+  }
+
+  .verify-card {
+    width: 100%;
+  }
+}
+</style>

@@ -3,27 +3,18 @@
 html,
 body,
 #app {
-  background-image: url('/images/wallet-bg.jpg');
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
-  background-repeat: no-repeat;
   background-color: #1a1a1a;
 }
 
+img {
+  max-width: 100%;
+  height: auto;
+}
+
 .q-page {
-  background-image: url('/images/wallet-bg.jpg');
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
-  background-repeat: no-repeat;
+  background-color: #1a1a1a;
 }
 
 .auth-page {
-  background-image: url('/images/wallet-bg.jpg');
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
-  background-repeat: no-repeat;
   background-color: #1a1a1a;
 }

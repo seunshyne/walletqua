@@ -1,7 +1,7 @@
 <template>
   <q-page padding>
     <!-- Header -->
-    <div class="row items-center justify-between q-mb-lg">
+    <div class="row items-center justify-between q-mb-lg history-header">
       <div>
         <h1 class="text-h4 text-weight-bold q-my-none history-title">Transaction History</h1>
         <p class="text-subtitle2 text-grey q-my-none">View all your transactions</p>
@@ -48,9 +48,9 @@
         @click="expandTransaction(transaction)"
       >
         <q-card-section class="q-pa-md">
-          <div class="row items-center justify-between">
+          <div class="row items-center justify-between transaction-row">
             <!-- Left: Icon and Details -->
-            <div class="row items-center col">
+            <div class="row items-center col transaction-left">
               <!-- Transaction Type Icon -->
               <div
                 class="transaction-icon q-mr-md"
@@ -109,7 +109,7 @@
 
             <!-- Right: Amount -->
             <div
-              class="text-right"
+              class="text-right transaction-right"
               :class="transaction.type === 'debit' ? 'text-negative' : 'text-positive'"
             >
               <div class="text-h6 text-weight-bold">
@@ -342,5 +342,35 @@ const expandTransaction = (transaction) => {
 
 .history-title {
   color: #ffffff;
+}
+
+.history-header {
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 600px) {
+  .history-title {
+    font-size: 1.5rem;
+  }
+
+  :deep(.q-tabs) {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  .transaction-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .transaction-left {
+    width: 100%;
+  }
+
+  .transaction-right {
+    text-align: left;
+  }
 }
 </style>
