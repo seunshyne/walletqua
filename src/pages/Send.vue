@@ -1,14 +1,15 @@
 <template>
-  <q-page padding>
-    <div class="row justify-center">
-      <q-card class="col-md-6 col-sm-8 col-xs-12">
-        <q-card-section class="bg-primary text-white">
-          <h4 class="text-h5 q-my-md">Send Money</h4>
+  <q-page class="send-page">
+    <div class="send-shell">
+      <q-card class="send-card">
+        <q-card-section class="send-hero">
+          <div class="hero-title">Send Money</div>
+          <div class="hero-sub">Transfer instantly to any wallet or bank account.</div>
         </q-card-section>
 
-        <q-card-section>
+        <q-card-section class="send-body">
           <!-- Success Message -->
-          <q-banner v-if="successMessage" class="bg-green-2 text-green-9 q-mb-md rounded q-pa-md">
+          <q-banner v-if="successMessage" class="bg-green-2 text-green-9 q-mb-md rounded q-pa-md status-banner">
             <template v-slot:avatar>
               <q-icon name="check_circle" color="green-9" size="lg" />
             </template>
@@ -19,7 +20,7 @@
           </q-banner>
 
           <!-- Error Messages -->
-          <q-banner v-if="errorMessage" class="bg-red-2 text-red-9 q-mb-md rounded q-pa-md">
+          <q-banner v-if="errorMessage" class="bg-red-2 text-red-9 q-mb-md rounded q-pa-md status-banner">
             <template v-slot:avatar>
               <q-icon name="error" color="red-9" size="lg" />
             </template>
@@ -29,10 +30,10 @@
             </template>
           </q-banner>
 
-          <q-form @submit.prevent="handleSubmit" class="q-gutter-md">
+          <q-form @submit.prevent="handleSubmit" class="send-form">
             <!-- Recipient Input -->
             <div>
-              <label class="text-subtitle2 q-mb-sm">Recipient</label>
+              <label class="field-label q-mb-sm">Recipient</label>
               <q-input
                 square
                 clearable
@@ -52,7 +53,7 @@
 
               <!-- Recipient Preview -->
               <div v-if="transactionStore.recipientPreview && !transactionStore.recipientError" class="q-mt-md">
-                <q-card class="bg-blue-1">
+                <q-card class="preview-card">
                   <q-card-section>
                     <div class="text-subtitle2 text-weight-bold">{{ transactionStore.recipientPreview.name }}</div>
                     <div class="text-caption text-grey">{{ transactionStore.recipientPreview.address }}</div>
@@ -105,11 +106,11 @@
             </q-input>
 
             <!-- Balance Info -->
-            <q-card class="bg-grey-2">
+            <q-card class="balance-card">
               <q-card-section>
                 <div class="row items-center justify-between">
-                  <span class="text-subtitle2">Current Balance:</span>
-                  <span class="text-h6 text-weight-bold text-primary">
+                  <span class="text-subtitle2">Current Balance</span>
+                  <span class="balance-amount">
                     {{ formatCurrency(authStore.getWalletBalance) }} {{ authStore.getWalletCurrency }}
                   </span>
                 </div>
@@ -117,7 +118,7 @@
             </q-card>
 
             <!-- Submit Button -->
-            <q-card-actions align="right">
+            <q-card-actions align="right" class="send-actions">
               <q-btn
                 flat
                 label="Cancel"
@@ -131,6 +132,7 @@
                 type="submit"
                 :loading="transactionStore.loading"
                 :disable="!isFormValid || transactionStore.loading"
+                class="primary-btn"
               />
             </q-card-actions>
           </q-form>
@@ -364,19 +366,137 @@ const resetForm = () => {
 </script>
 
 <style scoped>
-.q-card {
-  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+.send-page {
+  min-height: 100vh;
+  padding: 32px 16px 48px;
+  background: #0f1c2e;
+  color: #dbe7f7;
+  font-family: "Plus Jakarta Sans", "Manrope", "Segoe UI", sans-serif;
 }
 
-.q-banner {
+.send-shell {
+  display: flex;
+  justify-content: center;
+}
+
+.send-card {
+  width: min(720px, 100%);
+  border-radius: 24px;
+  background: #0b1626;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 20px 40px rgba(5, 10, 20, 0.35);
+}
+
+.send-hero {
+  padding: 28px 28px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(135deg, rgba(94, 234, 212, 0.12), rgba(56, 189, 248, 0.08));
+}
+
+.hero-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.hero-sub {
+  color: #9fb3d1;
+  margin-top: 6px;
+}
+
+.send-body {
+  padding: 24px 28px 28px;
+}
+
+.send-form {
+  display: grid;
+  gap: 16px;
+}
+
+.field-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #c8d6ef;
+}
+
+.send-form :deep(.q-field__control) {
+  border-radius: 14px;
+  background: #0f1e33;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  color: #e2ebf7;
+}
+
+.send-form :deep(.q-field__label),
+.send-form :deep(.q-field__native) {
+  color: #c7d4ea;
+}
+
+.send-form :deep(.q-field__control:hover) {
+  border-color: rgba(94, 234, 212, 0.5);
+}
+
+.send-form :deep(.q-field--focused .q-field__control) {
+  border-color: rgba(56, 189, 248, 0.8);
+}
+
+.status-banner {
   border-left: 4px solid;
 }
 
-.q-banner.bg-green-2 {
+.status-banner.bg-green-2 {
   border-left-color: #4caf50;
 }
 
-.q-banner.bg-red-2 {
+.status-banner.bg-red-2 {
   border-left-color: #f44336;
+}
+
+.preview-card {
+  background: rgba(94, 234, 212, 0.12);
+  border-radius: 16px;
+  border: 1px solid rgba(94, 234, 212, 0.2);
+}
+
+.balance-card {
+  background: rgba(15, 29, 50, 0.9);
+  border-radius: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+}
+
+.balance-amount {
+  font-weight: 700;
+  color: #5eead4;
+}
+
+.send-actions {
+  padding-top: 6px;
+}
+
+.primary-btn {
+  border-radius: 14px;
+  padding: 8px 20px;
+}
+
+@media (max-width: 600px) {
+  .send-page {
+    padding: 24px 12px 40px;
+  }
+
+  .send-hero {
+    padding: 22px 20px 16px;
+  }
+
+  .send-body {
+    padding: 20px;
+  }
+
+  .send-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .send-actions :deep(.q-btn) {
+    width: 100%;
+  }
 }
 </style>
