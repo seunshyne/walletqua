@@ -14,6 +14,10 @@
         </div>
 
         <nav class="nav">
+          <router-link to="/home" class="nav-item is-active">
+            <q-icon name="grid_view" />
+            <span>Home</span>
+          </router-link>
           <router-link to="/dashboard" class="nav-item is-active">
             <q-icon name="grid_view" />
             <span>Dashboard</span>
