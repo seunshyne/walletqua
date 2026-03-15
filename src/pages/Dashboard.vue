@@ -18,9 +18,9 @@
             <q-icon name="grid_view" />
             <span>Dashboard</span>
           </router-link>
-          <router-link to="/history" class="nav-item">
+          <router-link to="/transaction-history" class="nav-item">
             <q-icon name="history" />
-            <span>History</span>
+            <span>Transaction History</span>
           </router-link>
           <router-link to="/send" class="nav-item">
             <q-icon name="send" />
