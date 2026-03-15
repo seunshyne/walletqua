@@ -1,11 +1,11 @@
 ﻿<template>
   <q-layout view="lHh Lpr lFf" class="main-layout">
-    <q-header elevated class="site-header">
+    <q-header v-if="!isDashboardRoute" elevated class="site-header">
       <q-toolbar class="header-toolbar">
         <router-link :to="logoDestination" class="brand">
-          <div class="brand-mark">VP</div>
+          <div class="brand-mark">P</div>
           <div class="brand-text">
-            <div class="brand-name">VaultPay</div>
+            <div class="brand-name">PrimeWallet</div>
             <div class="brand-tag">Digital wallet platform</div>
           </div>
         </router-link>
@@ -52,7 +52,7 @@
       @mouseleave="closeLeftDrawer"
     >
       <q-list>
-        <q-item-label header class="text-weight-bold">VaultPay</q-item-label>
+        <q-item-label header class="text-weight-bold">PrimeWallet</q-item-label>
 
         <template v-if="isAuthenticated">
           <q-item-label header class="text-caption">{{ user?.name }}</q-item-label>
@@ -179,9 +179,12 @@
 
 <script setup>
 import { ref, computed, onMounted, getCurrentInstance } from "vue";
+import { useRoute } from "vue-router";
 import { useAuthStore } from "src/stores/auth";
 import { storeToRefs } from 'pinia'
+
 const authStore = useAuthStore();
+const route = useRoute();
 const { proxy } = getCurrentInstance();
 
 const { user, isAuthenticated } = storeToRefs(authStore);
@@ -189,6 +192,7 @@ const walletAddress = computed(() => authStore.getWalletAddress);
 const logoDestination = computed(() => {
   return isAuthenticated.value ? { path: 'dashboard' } : { path: '/' };
 });
+const isDashboardRoute = computed(() => route.path.startsWith('/dashboard'));
 
 const leftDrawerOpen = ref(false);
 

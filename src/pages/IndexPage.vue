@@ -5,7 +5,7 @@
         <div class="trust-chip">Trusted by 30,000+ users</div>
         <h1>Send, receive and manage your money - simply.</h1>
         <p class="hero-sub">
-          VaultPay gives you a secure digital wallet to track balances, pay bills, and move money
+          PrimeWallet gives you a secure digital wallet to track balances, pay bills, and move money
           instantly.
         </p>
         <div class="hero-actions">
@@ -29,7 +29,7 @@
       <div class="hero-card">
         <div class="card-top">
           <div class="card-chip"></div>
-          <div class="card-logo">VP</div>
+          <div class="card-logo">P</div>
         </div>
         <div class="card-balance">
           <div class="card-label">Total balance</div>
@@ -66,7 +66,7 @@
         <div class="feature-card">
           <q-icon name="bolt" class="feature-icon" />
           <h3>Instant transfers</h3>
-          <p>Send money to any bank or VaultPay user in seconds.</p>
+          <p>Send money to any bank or PrimeWallet user in seconds.</p>
         </div>
         <div class="feature-card">
           <q-icon name="receipt_long" class="feature-icon" />
@@ -129,7 +129,7 @@
     <section class="testimonials" id="testimonials">
       <div class="section-heading">
         <h2>Loved by thousands</h2>
-        <p>Teams and individuals trust VaultPay daily.</p>
+        <p>Teams and individuals trust PrimeWallet daily.</p>
       </div>
       <div class="testimonial-card">
         <div class="stars">
@@ -140,7 +140,7 @@
           <q-icon name="star" />
         </div>
         <p>
-          "VaultPay has completely changed how I manage my expenses. The app is fast and
+          "PrimeWallet has completely changed how I manage my expenses. The app is fast and
           transparent."
         </p>
         <div class="testimonial-user">
@@ -173,7 +173,7 @@
       </div>
       <div class="faq-grid">
         <div>
-          <h4>Is VaultPay secure?</h4>
+          <h4>Is PrimeWallet secure?</h4>
           <p>Yes. We use bank-grade encryption and multi-layer security controls.</p>
         </div>
         <div>
@@ -189,9 +189,9 @@
 
     <footer class="footer">
       <div class="footer-brand">
-        <div class="brand-mark small">VP</div>
+        <div class="brand-mark small">P</div>
         <div>
-          <div class="brand-name">VaultPay</div>
+          <div class="brand-name">PrimeWallet</div>
           <div class="footer-note">Secure digital wallet for modern money.</div>
         </div>
       </div>
@@ -200,7 +200,7 @@
         <span>Company</span>
         <span>Account</span>
       </div>
-      <div class="footer-meta">(c) 2026 VaultPay Technologies Ltd.</div>
+      <div class="footer-meta">(c) 2026 PrimeWallet Technologies Ltd.</div>
     </footer>
   </q-page>
 </template>

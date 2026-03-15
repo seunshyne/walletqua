@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <q-page class="dash-page">
     <div class="dash-shell">
       <aside class="dash-sidebar">
@@ -141,7 +141,7 @@
                   {{ tx.description || tx.counterparty_name || 'Transaction' }}
                 </div>
                 <div class="tx-sub">
-                  {{ formatDate(tx.date || tx.created_at) }} � {{ tx.type || 'transfer' }}
+                  {{ formatDate(tx.date || tx.created_at) }} • {{ tx.type || 'transfer' }}
                 </div>
               </div>
               <div class="tx-amount" :class="tx.type === 'debit' ? 'negative' : 'positive'">
@@ -748,3 +748,4 @@ function receiveMoney() {
   }
 }
 </style>
+
