@@ -86,7 +86,15 @@
         <section class="balance-card">
           <div>
             <div class="balance-label">+2.4% this month</div>
-            <div class="balance-amount">{{ formatCurrency(authStore.getWalletBalance) }}</div>
+            <div class="balance-amount">
+              <q-skeleton
+                v-if="authStore.loading"
+                type="text"
+                width="60%"
+                height="40px"
+              />
+              <span v-else>{{ formatCurrency(authStore.getWalletBalance) }}</span>
+            </div>
             <div class="balance-sub">Total combined balance</div>
           </div>
           <div class="balance-actions">
@@ -149,11 +157,23 @@
         <section class="transactions">
           <div class="transactions-header">
             <div>Recent Transactions</div>
-            <button class="link-btn">View all</button>
+            <button class="link-btn" @click="router.push({ name: 'transaction-history' })">
+              View all
+            </button>
           </div>
 
           <div class="transactions-list">
-            <div v-for="tx in recentTransactions" :key="tx.id" class="tx-row">
+            <div v-if="transactionStore.loading" class="tx-skeletons">
+              <div v-for="n in 5" :key="`tx-skeleton-${n}`" class="tx-row">
+                <q-skeleton type="QAvatar" size="44px" class="tx-skeleton-icon" />
+                <div class="tx-info">
+                  <q-skeleton type="text" width="60%" />
+                  <q-skeleton type="text" width="40%" />
+                </div>
+                <q-skeleton type="text" width="80px" class="tx-skeleton-amount" />
+              </div>
+            </div>
+            <div v-else v-for="tx in recentTransactions" :key="tx.id" class="tx-row">
               <div class="tx-icon">
                 <q-icon :name="tx.type === 'debit' ? 'payments' : 'account_balance_wallet'" />
               </div>
@@ -194,8 +214,17 @@ const isNavOpen = ref(false)
 // Fetch wallet on mount
 onMounted(async () => {
   if (authStore.isAuthenticated) {
-    await authStore.fetchWallet()
-    await transactionStore.fetchTransactions()
+    const promises = []
+
+    if (!authStore.getWalletBalance) {
+      promises.push(authStore.fetchWallet())
+    }
+
+    if (!transactionStore.transactions?.length) {
+      promises.push(transactionStore.fetchTransactions())
+    }
+
+    await Promise.all(promises)
   }
 });
 
@@ -706,6 +735,18 @@ const closeNav = () => {
 .tx-badge.credit {
   background: rgba(94, 234, 212, 0.15);
   color: #5eead4;
+}
+
+.tx-skeletons .tx-row {
+  grid-template-columns: 44px 1fr auto;
+}
+
+.tx-skeleton-icon {
+  border-radius: 14px;
+}
+
+.tx-skeleton-amount {
+  justify-self: end;
 }
 
 @media (max-width: 700px) {
