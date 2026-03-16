@@ -192,7 +192,10 @@ const walletAddress = computed(() => authStore.getWalletAddress);
 const logoDestination = computed(() => {
   return isAuthenticated.value ? { path: 'dashboard' } : { path: '/' };
 });
-const isDashboardRoute = computed(() => route.path.startsWith('/dashboard'));
+const isDashboardRoute = computed(() => {
+  const hiddenHeaderRoutes = ['/dashboard', '/send', '/transaction-history'];
+  return hiddenHeaderRoutes.some((path) => route.path.startsWith(path));
+});
 
 const leftDrawerOpen = ref(false);
 

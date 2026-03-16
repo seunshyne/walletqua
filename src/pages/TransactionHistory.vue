@@ -1,10 +1,50 @@
 <template>
   <q-page padding>
+    <nav class="mobile-nav" :class="{ 'is-open': isNavOpen }">
+      <router-link to="/" class="nav-item" @click="closeNav">
+        <q-icon name="grid_view" />
+        <span>Home</span>
+      </router-link>
+      <router-link to="/dashboard" class="nav-item" @click="closeNav">
+        <q-icon name="grid_view" />
+        <span>Dashboard</span>
+      </router-link>
+      <router-link to="/transaction-history" class="nav-item" @click="closeNav">
+        <q-icon name="history" />
+        <span>Transaction History</span>
+      </router-link>
+      <router-link to="/send" class="nav-item" @click="closeNav">
+        <q-icon name="send" />
+        <span>Send</span>
+      </router-link>
+      <router-link to="/receive" class="nav-item" @click="closeNav">
+        <q-icon name="download" />
+        <span>Receive</span>
+      </router-link>
+      <router-link to="/analytics" class="nav-item" @click="closeNav">
+        <q-icon name="leaderboard" />
+        <span>Analytics</span>
+      </router-link>
+    </nav>
+
+    <div class="nav-backdrop" :class="{ 'is-open': isNavOpen }" @click="closeNav"></div>
+
     <!-- Header -->
     <div class="row items-center justify-between q-mb-lg history-header">
-      <div>
-        <h1 class="text-h4 text-weight-bold q-my-none history-title">Transaction History</h1>
-        <p class="text-subtitle2 text-grey q-my-none">View all your transactions</p>
+      <div class="history-heading">
+        <q-btn
+          flat
+          dense
+          round
+          icon="menu"
+          class="lt-md"
+          aria-label="Toggle navigation"
+          @click="toggleNav"
+        />
+        <div>
+          <h1 class="text-h4 text-weight-bold q-my-none history-title">Transaction History</h1>
+          <p class="text-subtitle2 text-grey q-my-none">View all your transactions</p>
+        </div>
       </div>
       <q-btn
         flat
@@ -212,6 +252,7 @@ const transactionStore = useTransactionStore()
 
 const activeTab = ref('all')
 const expandedTransactionId = ref(null)
+const isNavOpen = ref(false)
 
 // Fetch transactions on mount
 onMounted(async () => {
@@ -289,9 +330,23 @@ const expandTransaction = (transaction) => {
   expandedTransactionId.value =
     expandedTransactionId.value === transaction.id ? null : transaction.id
 }
+
+const toggleNav = () => {
+  isNavOpen.value = !isNavOpen.value
+}
+
+const closeNav = () => {
+  isNavOpen.value = false
+}
 </script>
 
 <style scoped>
+.history-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .transaction-list {
   animation: slideUp 0.3s ease;
 }
@@ -347,6 +402,59 @@ const expandTransaction = (transaction) => {
 .history-header {
   gap: 12px;
   flex-wrap: wrap;
+}
+
+.mobile-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 260px;
+  padding: 24px 18px;
+  background: #0b1626;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 12px 0 24px rgba(5, 10, 20, 0.35);
+  transform: translateX(-100%);
+  transition: transform 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 30;
+}
+
+.mobile-nav.is-open {
+  transform: translateX(0);
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  color: #b2c1da;
+  text-decoration: none;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.nav-item:hover {
+  background: rgba(123, 96, 255, 0.12);
+  color: #ffffff;
+}
+
+.nav-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(6, 12, 22, 0.55);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 20;
+}
+
+.nav-backdrop.is-open {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 @media (max-width: 600px) {

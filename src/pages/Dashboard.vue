@@ -14,7 +14,7 @@
         </div>
 
         <nav class="nav">
-          <router-link to="/home" class="nav-item is-active" @click="closeNav">
+          <router-link to="/" class="nav-item is-active" @click="closeNav">
             <q-icon name="grid_view" />
             <span>Home</span>
           </router-link>
