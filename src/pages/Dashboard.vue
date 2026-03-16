@@ -701,7 +701,7 @@ const closeNav = () => {
   color: #5eead4;
 }
 
-@media (max-width: 1100px) {
+@media (max-width: 900px) {
   .dash-shell {
     grid-template-columns: 1fr;
   }
@@ -766,17 +766,22 @@ const closeNav = () => {
   }
 
   .nav-item {
-    flex: 1 1 calc(50% - 10px);
+    flex: 0 0 auto;
     justify-content: flex-start;
   }
 
   .dash-sidebar {
     align-items: flex-start;
+    padding: 0;
+    background: transparent;
+    border-right: none;
   }
 
   .nav {
     display: none;
     width: 100%;
+    flex-direction: column;
+    align-items: stretch;
   }
 
   .dash-sidebar {
@@ -807,6 +812,10 @@ const closeNav = () => {
 
   .nav-item {
     width: 100%;
+  }
+
+  .dash-sidebar > *:not(.nav) {
+    display: none;
   }
 
   .nav-backdrop {
