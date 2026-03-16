@@ -10,14 +10,14 @@
           </div>
         </router-link>
 
-        <div class="header-links gt-sm" v-if="!isAuthenticated">
+        <div class="header-links" v-if="!isAuthenticated">
           <a class="header-link" href="#features">Features</a>
           <a class="header-link" href="#steps">Get started</a>
           <a class="header-link" href="#testimonials">Reviews</a>
           <a class="header-link" href="#faq">FAQ</a>
         </div>
 
-        <div class="header-actions gt-sm">
+        <div class="header-actions">
           <template v-if="isAuthenticated">
             <div class="user-info q-mr-md">
               <div class="text-subtitle2">{{ user?.name }}</div>
@@ -32,144 +32,8 @@
             <q-btn unelevated label="Get started" color="primary" to="register" />
           </template>
         </div>
-
-        <q-btn
-          flat
-          dense
-          round
-          icon="menu"
-          aria-label="Menu"
-          class="lt-md"
-          @click="toggleLeftDrawer"
-        />
       </q-toolbar>
     </q-header>
-
-    <q-drawer
-      v-model="leftDrawerOpen"
-      show-if-above
-      bordered
-      @mouseleave="closeLeftDrawer"
-    >
-      <q-list>
-        <q-item-label header class="text-weight-bold">PrimeWallet</q-item-label>
-
-        <template v-if="isAuthenticated">
-          <q-item-label header class="text-caption">{{ user?.name }}</q-item-label>
-
-          <q-item clickable to="dashboard" active-class="bg-primary text-white">
-            <q-item-section avatar>
-              <q-icon name="dashboard" />
-            </q-item-section>
-            <q-item-section>Dashboard</q-item-section>
-          </q-item>
-
-          <q-item clickable to="send" active-class="bg-primary text-white">
-            <q-item-section avatar>
-              <q-icon name="send" />
-            </q-item-section>
-            <q-item-section>Send Money</q-item-section>
-          </q-item>
-
-          <q-item clickable to="receive" active-class="bg-primary text-white">
-            <q-item-section avatar>
-              <q-icon name="call_received" />
-            </q-item-section>
-            <q-item-section>Receive Money</q-item-section>
-          </q-item>
-
-          <q-item clickable to="transaction-history" active-class="bg-primary text-white">
-            <q-item-section avatar>
-              <q-icon name="history" />
-            </q-item-section>
-            <q-item-section>Transaction History</q-item-section>
-          </q-item>
-
-          <q-item clickable active-class="bg-primary text-white">
-            <q-item-section avatar>
-              <q-icon name="settings" />
-            </q-item-section>
-            <q-item-section>Settings</q-item-section>
-          </q-item>
-
-          <q-separator class="q-my-md" />
-
-          <q-item clickable active-class="bg-primary text-white">
-            <q-item-section avatar>
-              <q-icon name="help" />
-            </q-item-section>
-            <q-item-section>Help & Support</q-item-section>
-          </q-item>
-
-          <q-item clickable active-class="bg-primary text-white">
-            <q-item-section avatar>
-              <q-icon name="info" />
-            </q-item-section>
-            <q-item-section>About</q-item-section>
-          </q-item>
-        </template>
-
-        <template v-else>
-          <q-item clickable to="/" active-class="bg-primary text-white">
-            <q-item-section avatar>
-              <q-icon name="home" />
-            </q-item-section>
-            <q-item-section>Home</q-item-section>
-          </q-item>
-
-          <q-item clickable :to="{ path: '/', hash: '#features' }" active-class="bg-primary text-white">
-            <q-item-section avatar>
-              <q-icon name="stars" />
-            </q-item-section>
-            <q-item-section>Features</q-item-section>
-          </q-item>
-
-          <q-item clickable :to="{ path: '/', hash: '#steps' }" active-class="bg-primary text-white">
-            <q-item-section avatar>
-              <q-icon name="rocket_launch" />
-            </q-item-section>
-            <q-item-section>Get started</q-item-section>
-          </q-item>
-
-          <q-item clickable :to="{ path: '/', hash: '#testimonials' }" active-class="bg-primary text-white">
-            <q-item-section avatar>
-              <q-icon name="reviews" />
-            </q-item-section>
-            <q-item-section>Reviews</q-item-section>
-          </q-item>
-
-          <q-item clickable :to="{ path: '/', hash: '#faq' }" active-class="bg-primary text-white">
-            <q-item-section avatar>
-              <q-icon name="help" />
-            </q-item-section>
-            <q-item-section>FAQ</q-item-section>
-          </q-item>
-
-          <q-item clickable to="login" active-class="bg-primary text-white">
-            <q-item-section avatar>
-              <q-icon name="login" />
-            </q-item-section>
-            <q-item-section>Login</q-item-section>
-          </q-item>
-
-          <q-item clickable to="register" active-class="bg-primary text-white">
-            <q-item-section avatar>
-              <q-icon name="app_registration" />
-            </q-item-section>
-            <q-item-section>Register</q-item-section>
-          </q-item>
-
-          <q-separator class="q-my-md" />
-
-          <q-item clickable active-class="bg-primary text-white">
-            <q-item-section avatar>
-              <q-icon name="info" />
-            </q-item-section>
-            <q-item-section>About</q-item-section>
-          </q-item>
-        </template>
-      </q-list>
-    </q-drawer>
 
     <q-page-container>
       <router-view :key="$route.fullPath" />
@@ -178,7 +42,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, getCurrentInstance } from "vue";
+import { computed, getCurrentInstance } from "vue";
 import { useRoute } from "vue-router";
 import { useAuthStore } from "src/stores/auth";
 import { storeToRefs } from 'pinia'
@@ -197,14 +61,6 @@ const isDashboardRoute = computed(() => {
   return hiddenHeaderRoutes.some((path) => route.path.startsWith(path));
 });
 
-const leftDrawerOpen = ref(false);
-
-onMounted(() => {
-  if (proxy.$q && proxy.$q.screen.gt.sm) {
-    leftDrawerOpen.value = false;
-  }
-});
-
 const logout = async () => {
   const result = await authStore.logout();
   if (!result?.success) {
@@ -218,14 +74,6 @@ const logout = async () => {
     }
   }
 };
-
-function toggleLeftDrawer() {
-  leftDrawerOpen.value = !leftDrawerOpen.value;
-}
-
-function closeLeftDrawer() {
-  leftDrawerOpen.value = false;
-}
 </script>
 
 <style scoped>
@@ -356,6 +204,17 @@ function closeLeftDrawer() {
 
   .brand-tag {
     display: none;
+  }
+
+  .header-links {
+    flex: 1 1 100%;
+    margin-left: 0;
+  }
+
+  .header-actions {
+    margin-left: 0;
+    width: 100%;
+    justify-content: flex-start;
   }
 }
 </style>
