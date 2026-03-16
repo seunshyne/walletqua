@@ -292,6 +292,7 @@ const closeNav = () => {
   display: grid;
   grid-template-columns: 260px 1fr;
   min-height: 100vh;
+  width: 100%;
 }
 
 .dash-sidebar {
@@ -418,6 +419,7 @@ const closeNav = () => {
 
 .dash-main {
   padding: 28px 32px 40px;
+  min-width: 0;
 }
 
 .dash-topbar {
@@ -701,7 +703,7 @@ const closeNav = () => {
   color: #5eead4;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 700px) {
   .dash-shell {
     grid-template-columns: 1fr;
   }
