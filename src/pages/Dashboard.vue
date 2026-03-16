@@ -290,14 +290,15 @@ const closeNav = () => {
 }
 
 .dash-shell {
-  display: grid;
-  grid-template-columns: 260px minmax(0, 1fr);
+  display: flex;
+  align-items: stretch;
   min-height: 100vh;
   width: 100%;
   justify-content: stretch;
 }
 
 .dash-sidebar {
+  flex: 0 0 260px;
   padding: 28px 22px;
   background: #0b1626;
   border-right: 1px solid rgba(255, 255, 255, 0.06);
@@ -423,6 +424,7 @@ const closeNav = () => {
   padding: 28px 32px 40px;
   min-width: 0;
   width: 100%;
+  flex: 1 1 auto;
 }
 
 .dash-topbar {
@@ -708,7 +710,7 @@ const closeNav = () => {
 
 @media (max-width: 700px) {
   .dash-shell {
-    grid-template-columns: 1fr;
+    flex-direction: column;
   }
 
   .dash-sidebar {
@@ -717,6 +719,8 @@ const closeNav = () => {
     justify-content: space-between;
     flex-wrap: wrap;
     gap: 16px;
+    width: 100%;
+    flex: 0 0 auto;
   }
 
   .nav {
