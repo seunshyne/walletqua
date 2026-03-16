@@ -447,6 +447,8 @@ const resetForm = () => {
 
 .status-banner {
   border-left: 4px solid;
+  border-radius: 16px;
+  overflow: hidden;
 }
 
 .status-banner.bg-green-2 {
