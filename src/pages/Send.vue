@@ -769,28 +769,7 @@ const logout = async () => {
   padding: 8px 20px;
 }
 
-@media (max-width: 600px) {
-  .send-page {
-    padding: 24px 12px 40px;
-  }
-
-  .send-hero {
-    padding: 22px 20px 16px;
-  }
-
-  .send-body {
-    padding: 20px;
-  }
-
-  .send-actions {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .send-actions :deep(.q-btn) {
-    width: 100%;
-  }
-
+@media (max-width: 700px) {
   .dash-shell {
     flex-direction: column;
   }
@@ -802,10 +781,41 @@ const logout = async () => {
     flex-wrap: wrap;
     gap: 16px;
     width: 100%;
+    flex: 0 0 auto;
+  }
+
+  .nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    flex: 1 1 100%;
+  }
+
+  .nav-item {
+    flex: 1 1 160px;
+  }
+
+  .sidebar-footer {
+    display: none;
+  }
+}
+
+@media (max-width: 700px) {
+  .dash-main {
+    padding: 20px 18px 32px;
+  }
+
+  .nav {
+    row-gap: 8px;
+  }
+
+  .nav-item {
+    flex: 0 0 auto;
+    justify-content: flex-start;
   }
 
   .dash-sidebar {
-    position: relative;
+    align-items: flex-start;
     padding: 0;
     background: transparent;
     border-right: none;
@@ -816,6 +826,10 @@ const logout = async () => {
     width: 100%;
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .dash-sidebar {
+    position: relative;
   }
 
   .nav {
@@ -840,8 +854,54 @@ const logout = async () => {
     transform: translateX(0);
   }
 
+  .nav-item {
+    width: 100%;
+  }
+
   .dash-sidebar > *:not(.nav) {
     display: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .send-page {
+    padding: 24px 12px 40px;
+  }
+
+  .send-hero {
+    padding: 22px 20px 16px;
+  }
+
+  .send-body {
+    padding: 20px;
+  }
+
+  .send-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .send-actions :deep(.q-btn) {
+    width: 100%;
+  }
+}
+
+@media (max-width: 560px) {
+  .dash-topbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .dash-sidebar {
+    padding: 16px;
+    gap: 16px;
+    align-items: flex-start;
+  }
+
+  .nav {
+    flex-direction: column;
+    align-items: stretch;
   }
 }
 </style>

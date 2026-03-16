@@ -699,11 +699,7 @@ const onLoadMore = (index, done) => {
   pointer-events: auto;
 }
 
-@media (max-width: 600px) {
-  .history-title {
-    font-size: 1.5rem;
-  }
-
+@media (max-width: 700px) {
   .dash-shell {
     flex-direction: column;
   }
@@ -715,10 +711,41 @@ const onLoadMore = (index, done) => {
     flex-wrap: wrap;
     gap: 16px;
     width: 100%;
+    flex: 0 0 auto;
+  }
+
+  .nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    flex: 1 1 100%;
+  }
+
+  .nav-item {
+    flex: 1 1 160px;
+  }
+
+  .sidebar-footer {
+    display: none;
+  }
+}
+
+@media (max-width: 700px) {
+  .dash-main {
+    padding: 20px 18px 32px;
+  }
+
+  .nav {
+    row-gap: 8px;
+  }
+
+  .nav-item {
+    flex: 0 0 auto;
+    justify-content: flex-start;
   }
 
   .dash-sidebar {
-    position: relative;
+    align-items: flex-start;
     padding: 0;
     background: transparent;
     border-right: none;
@@ -729,6 +756,10 @@ const onLoadMore = (index, done) => {
     width: 100%;
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .dash-sidebar {
+    position: relative;
   }
 
   .nav {
@@ -753,8 +784,18 @@ const onLoadMore = (index, done) => {
     transform: translateX(0);
   }
 
+  .nav-item {
+    width: 100%;
+  }
+
   .dash-sidebar > *:not(.nav) {
     display: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .history-title {
+    font-size: 1.5rem;
   }
 
   :deep(.q-tabs) {
@@ -774,6 +815,25 @@ const onLoadMore = (index, done) => {
 
   .transaction-right {
     text-align: left;
+  }
+}
+
+@media (max-width: 560px) {
+  .dash-topbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .dash-sidebar {
+    padding: 16px;
+    gap: 16px;
+    align-items: flex-start;
+  }
+
+  .nav {
+    flex-direction: column;
+    align-items: stretch;
   }
 }
 </style>
