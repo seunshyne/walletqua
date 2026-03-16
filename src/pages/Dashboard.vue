@@ -55,6 +55,12 @@
         </div>
       </aside>
 
+      <div
+        class="nav-backdrop"
+        :class="{ 'is-open': isNavOpen }"
+        @click="closeNav"
+      ></div>
+
       <main class="dash-main">
         <header class="dash-topbar">
           <div class="greeting-wrap">
@@ -772,9 +778,49 @@ const closeNav = () => {
     width: 100%;
   }
 
-  .dash-sidebar.is-open .nav {
+  .dash-sidebar {
+    position: relative;
+  }
+
+  .nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 260px;
+    padding: 24px 18px;
+    background: #0b1626;
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 12px 0 24px rgba(5, 10, 20, 0.35);
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
     display: flex;
     flex-direction: column;
+    gap: 10px;
+    z-index: 30;
+  }
+
+  .dash-sidebar.is-open .nav {
+    transform: translateX(0);
+  }
+
+  .nav-item {
+    width: 100%;
+  }
+
+  .nav-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(6, 12, 22, 0.55);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+    z-index: 20;
+  }
+
+  .nav-backdrop.is-open {
+    opacity: 1;
+    pointer-events: auto;
   }
 }
 
