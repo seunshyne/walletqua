@@ -833,7 +833,8 @@ const closeNav = () => {
   }
 
   .quick-actions {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
   }
 
   .dash-sidebar {
@@ -853,6 +854,26 @@ const closeNav = () => {
 
   .balance-amount {
     font-size: 1.9rem;
+  }
+
+  .quick-card {
+    padding: clamp(8px, 2.2vw, 10px);
+    font-size: clamp(0.72rem, 2.2vw, 0.8rem);
+    border-radius: 14px;
+    gap: 8px;
+  }
+
+  .quick-icon {
+    width: clamp(26px, 7vw, 30px);
+    height: clamp(26px, 7vw, 30px);
+    border-radius: 12px;
+  }
+}
+
+@media (max-width: 400px) {
+  .quick-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
   }
 }
 </style>
