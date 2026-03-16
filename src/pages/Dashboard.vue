@@ -1,7 +1,7 @@
 ﻿<template>
   <q-page class="dash-page">
     <div class="dash-shell">
-      <aside class="dash-sidebar">
+      <aside class="dash-sidebar" :class="{ 'is-open': isNavOpen }">
         <div class="brand">
           <div class="brand-badge">
             <span class="brand-dot"></span>
@@ -14,27 +14,27 @@
         </div>
 
         <nav class="nav">
-          <router-link to="/home" class="nav-item is-active">
+          <router-link to="/home" class="nav-item is-active" @click="closeNav">
             <q-icon name="grid_view" />
             <span>Home</span>
           </router-link>
-          <router-link to="/dashboard" class="nav-item is-active">
+          <router-link to="/dashboard" class="nav-item is-active" @click="closeNav">
             <q-icon name="grid_view" />
             <span>Dashboard</span>
           </router-link>
-          <router-link to="/transaction-history" class="nav-item">
+          <router-link to="/transaction-history" class="nav-item" @click="closeNav">
             <q-icon name="history" />
             <span>Transaction History</span>
           </router-link>
-          <router-link to="/send" class="nav-item">
+          <router-link to="/send" class="nav-item" @click="closeNav">
             <q-icon name="send" />
             <span>Send</span>
           </router-link>
-          <router-link to="/receive" class="nav-item">
+          <router-link to="/receive" class="nav-item" @click="closeNav">
             <q-icon name="download" />
             <span>Receive</span>
           </router-link>
-          <router-link to="/analytics" class="nav-item">
+          <router-link to="/analytics" class="nav-item" @click="closeNav">
             <q-icon name="leaderboard" />
             <span>Analytics</span>
           </router-link>
@@ -57,8 +57,19 @@
 
       <main class="dash-main">
         <header class="dash-topbar">
-          <div class="greeting">
-            Good morning, <span>{{ authStore.user?.name || 'Alex' }}</span>
+          <div class="greeting-wrap">
+            <q-btn
+              flat
+              dense
+              round
+              icon="menu"
+              class="lt-md"
+              aria-label="Toggle navigation"
+              @click="toggleNav"
+            />
+            <div class="greeting">
+              Good morning, <span>{{ authStore.user?.name || 'Alex' }}</span>
+            </div>
           </div>
           <div class="top-actions">
             <q-btn dense flat round icon="notifications" class="icon-btn" />
@@ -163,7 +174,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from 'src/stores/auth'
 import { useTransactionStore } from 'src/stores/transaction'
@@ -172,6 +183,7 @@ import { formatCurrency } from 'src/utils/index'
 const router = useRouter()
 const authStore = useAuthStore()
 const transactionStore = useTransactionStore()
+const isNavOpen = ref(false)
 
 // Fetch wallet on mount
 onMounted(async () => {
@@ -252,7 +264,15 @@ const getStatusColor = (status) => {
 function receiveMoney() {
   console.log('Receive money clicked');
 }
- </script>
+
+const toggleNav = () => {
+  isNavOpen.value = !isNavOpen.value
+}
+
+const closeNav = () => {
+  isNavOpen.value = false
+}
+</script>
 
 <style scoped>
 .dash-page {
@@ -418,6 +438,12 @@ function receiveMoney() {
 
 .icon-btn {
   color: #c7d2e8;
+}
+
+.greeting-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .balance-card {
@@ -677,11 +703,19 @@ function receiveMoney() {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
   }
 
   .nav {
-    grid-auto-flow: column;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    flex: 1 1 100%;
+  }
+
+  .nav-item {
+    flex: 1 1 160px;
   }
 
   .sidebar-footer {
@@ -721,8 +755,26 @@ function receiveMoney() {
   }
 
   .nav {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
     row-gap: 8px;
+  }
+
+  .nav-item {
+    flex: 1 1 calc(50% - 10px);
+    justify-content: flex-start;
+  }
+
+  .dash-sidebar {
+    align-items: flex-start;
+  }
+
+  .nav {
+    display: none;
+    width: 100%;
+  }
+
+  .dash-sidebar.is-open .nav {
+    display: flex;
+    flex-direction: column;
   }
 }
 
@@ -741,14 +793,20 @@ function receiveMoney() {
   .dash-sidebar {
     padding: 16px;
     gap: 16px;
+    align-items: flex-start;
   }
 
   .nav {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    flex-direction: column;
+    align-items: stretch;
   }
 
   .balance-card {
     padding: 18px;
+  }
+
+  .balance-amount {
+    font-size: 1.9rem;
   }
 }
 </style>

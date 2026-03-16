@@ -511,6 +511,8 @@ section {
 
   .hero-card {
     max-width: 340px;
+    width: 100%;
+    margin: 0 auto;
   }
 
   .stats {
@@ -551,6 +553,11 @@ section {
   .cta-main,
   .cta-ghost {
     width: 100%;
+  }
+
+  .footer-links {
+    flex-wrap: wrap;
+    row-gap: 8px;
   }
 }
 </style>

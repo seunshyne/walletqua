@@ -318,7 +318,39 @@ function closeLeftDrawer() {
   text-overflow: ellipsis;
 }
 
+@media (max-width: 1024px) {
+  .header-toolbar {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .brand {
+    flex: 1 1 220px;
+  }
+
+  .header-links {
+    flex-wrap: wrap;
+    row-gap: 6px;
+  }
+
+  .header-actions {
+    flex-wrap: wrap;
+  }
+}
+
 @media (max-width: 700px) {
+  .header-toolbar {
+    padding: 0 14px;
+  }
+
+  .brand-text {
+    max-width: 160px;
+  }
+
+  .brand-name {
+    font-size: 0.95rem;
+  }
+
   .brand-tag {
     display: none;
   }
