@@ -420,7 +420,7 @@ const resetForm = () => {
 }
 
 .send-form :deep(.q-field__control) {
-  border-radius: 14px;
+  border-radius: 18px;
   background: #0f1e33;
   border: 1px solid rgba(148, 163, 184, 0.25);
   color: #e2ebf7;
@@ -429,6 +429,12 @@ const resetForm = () => {
 .send-form :deep(.q-field__label),
 .send-form :deep(.q-field__native) {
   color: #c7d4ea;
+}
+
+.send-form :deep(.q-field__bottom),
+.send-form :deep(.q-field__messages),
+.send-form :deep(.q-field__hint) {
+  color: #e6f0ff;
 }
 
 .send-form :deep(.q-field__control:hover) {
