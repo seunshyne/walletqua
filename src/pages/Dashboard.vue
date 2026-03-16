@@ -701,7 +701,7 @@ const closeNav = () => {
   color: #5eead4;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 768px) {
   .dash-shell {
     grid-template-columns: 1fr;
   }
