@@ -111,179 +111,204 @@
           </q-tabs>
         </div>
 
-        <!-- Empty State -->
-        <div v-if="filteredTransactions.length === 0" class="text-center q-py-lg">
-          <q-icon name="inbox" size="64px" color="grey-4" />
-          <p class="text-h6 text-grey q-mt-md">No transactions found</p>
-          <p class="text-body2 text-grey-7">{{ emptyMessage }}</p>
+    <!-- Loading Skeleton -->
+    <div v-if="transactionStore.loading" class="transaction-skeleton">
+      <div v-for="n in 5" :key="`skeleton-${n}`" class="transaction-card q-mb-md">
+        <div class="transaction-row">
+          <q-skeleton type="QAvatar" size="48px" class="q-mr-md" />
+          <div class="skeleton-texts">
+            <q-skeleton type="text" width="60%" />
+            <q-skeleton type="text" width="40%" />
+          </div>
+          <q-skeleton type="text" width="80px" class="skeleton-amount" />
         </div>
+      </div>
+    </div>
 
-        <!-- Transaction List -->
-        <div v-else class="transaction-list">
-          <q-card
-            v-for="transaction in filteredTransactions"
-            :key="transaction.id"
-            class="transaction-card q-mb-md cursor-pointer hover-card"
-            @click="expandTransaction(transaction)"
-          >
-            <q-card-section class="q-pa-md">
-              <div class="row items-center justify-between transaction-row">
-                <!-- Left: Icon and Details -->
-                <div class="row items-center col transaction-left">
-                  <!-- Transaction Type Icon -->
+    <!-- Empty State -->
+    <div v-else-if="filteredTransactions.length === 0" class="text-center q-py-lg">
+      <q-icon name="inbox" size="64px" color="grey-4" />
+      <p class="text-h6 text-grey q-mt-md">No transactions found</p>
+      <p class="text-body2 text-grey-7">{{ emptyMessage }}</p>
+    </div>
+
+    <!-- Transaction List -->
+    <q-infinite-scroll
+      v-else
+      class="transaction-list"
+      :offset="150"
+      @load="onLoadMore"
+    >
+      <q-card
+        v-for="transaction in filteredTransactions"
+        :key="transaction.id"
+        class="transaction-card q-mb-md cursor-pointer hover-card"
+        @click="expandTransaction(transaction)"
+      >
+        <q-card-section class="q-pa-md">
+          <div class="row items-center justify-between transaction-row">
+            <!-- Left: Icon and Details -->
+            <div class="row items-center col transaction-left">
+              <!-- Transaction Type Icon -->
+              <div
+                class="transaction-icon q-mr-md"
+                :class="transaction.type === 'debit' ? 'sent-icon' : 'received-icon'"
+              >
+                <q-icon
+                  :name="transaction.type === 'debit' ? 'send' : 'call_received'"
+                  color="white"
+                  size="sm"
+                />
+              </div>
+
+              <!-- Transaction Info -->
+              <div class="col">
+                <!-- Counterparty Name -->
+                <div class="text-weight-bold text-body1">
+                  {{
+                    transaction.type === 'debit'
+                      ? `Sent to ${transaction.counterparty_name}`
+                      : `Received from ${transaction.counterparty_name}`
+                  }}
+                </div>
+
+                <!-- Description -->
+                <div class="text-caption text-grey q-mt-xs">
+                  {{ transaction.description || 'No description' }}
+                </div>
+
+                <!-- Date and Status -->
+                <div class="text-caption text-grey-7 q-mt-xs">
+                  {{ formatDate(transaction.date) }}
+                  <q-icon
+                    v-if="transaction.status === 'completed'"
+                    name="check_circle"
+                    color="positive"
+                    size="xs"
+                    class="q-ml-xs"
+                  />
+                  <q-icon
+                    v-else-if="transaction.status === 'pending'"
+                    name="schedule"
+                    color="warning"
+                    size="xs"
+                    class="q-ml-xs"
+                  />
+                  <q-icon
+                    v-else-if="transaction.status === 'failed'"
+                    name="cancel"
+                    color="negative"
+                    size="xs"
+                    class="q-ml-xs"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: Amount -->
+            <div
+              class="text-right transaction-right"
+              :class="transaction.type === 'debit' ? 'text-negative' : 'text-positive'"
+            >
+              <div class="text-h6 text-weight-bold">
+                {{ transaction.type === 'debit' ? '-' : '+' }}{{ formatCurrency(transaction.amount) }}
+              </div>
+              <div class="text-caption text-weight-bold">{{ authStore.getWalletCurrency }}</div>
+            </div>
+          </div>
+        </q-card-section>
+
+        <!-- Expandable Details -->
+        <q-separator />
+        <q-slide-transition>
+          <div v-show="expandedTransactionId === transaction.id">
+            <q-card-section class="bg-grey-1 q-pa-md">
+              <div class="row justify-between">
+                <div class="col-sm-6">
+                  <div class="text-caption text-weight-bold text-grey">Transaction ID</div>
+                  <div class="text-body2 q-mb-md break-word">{{ transaction.id }}</div>
+
+                  <div class="text-caption text-weight-bold text-grey">
+                    {{ transaction.type === 'debit' ? 'Recipient' : 'Sender' }}
+                  </div>
+                  <div class="text-body2 q-mb-md">
+                    {{ transaction.counterparty_name }}
+                  </div>
+
+                  <div class="text-caption text-weight-bold text-grey">Wallet Address</div>
+                  <div class="text-body2 q-mb-md break-word text-primary">
+                    {{ transaction.counterparty_address }}
+                  </div>
+                </div>
+
+                <div class="col-sm-6">
+                  <div class="text-caption text-weight-bold text-grey">Amount</div>
                   <div
-                    class="transaction-icon q-mr-md"
-                    :class="transaction.type === 'debit' ? 'sent-icon' : 'received-icon'"
+                    class="text-body2 q-mb-md text-weight-bold"
+                    :class="transaction.type === 'debit' ? 'text-negative' : 'text-positive'"
                   >
-                    <q-icon
-                      :name="transaction.type === 'debit' ? 'send' : 'call_received'"
-                      color="white"
-                      size="sm"
-                    />
+                    {{ transaction.type === 'debit' ? '-' : '+' }}{{
+                      formatCurrency(transaction.amount)
+                    }}
+                    {{ authStore.getWalletCurrency }}
                   </div>
 
-                  <!-- Transaction Info -->
-                  <div class="col">
-                    <!-- Counterparty Name -->
-                    <div class="text-weight-bold text-body1">
-                      {{
-                        transaction.type === 'debit'
-                          ? `Sent to ${transaction.counterparty_name}`
-                          : `Received from ${transaction.counterparty_name}`
-                      }}
-                    </div>
+                  <div class="text-caption text-weight-bold text-grey">Status</div>
+                  <q-badge
+                    :label="transaction.status"
+                    :color="getStatusColor(transaction.status)"
+                    text-color="white"
+                    class="q-mb-md"
+                  />
 
-                    <!-- Description -->
-                    <div class="text-caption text-grey q-mt-xs">
-                      {{ transaction.description || 'No description' }}
-                    </div>
-
-                    <!-- Date and Status -->
-                    <div class="text-caption text-grey-7 q-mt-xs">
-                      {{ formatDate(transaction.date) }}
-                      <q-icon
-                        v-if="transaction.status === 'completed'"
-                        name="check_circle"
-                        color="positive"
-                        size="xs"
-                        class="q-ml-xs"
-                      />
-                      <q-icon
-                        v-else-if="transaction.status === 'pending'"
-                        name="schedule"
-                        color="warning"
-                        size="xs"
-                        class="q-ml-xs"
-                      />
-                      <q-icon
-                        v-else-if="transaction.status === 'failed'"
-                        name="cancel"
-                        color="negative"
-                        size="xs"
-                        class="q-ml-xs"
-                      />
-                    </div>
-                  </div>
+                  <div class="text-caption text-weight-bold text-grey">Date & Time</div>
+                  <div class="text-body2">{{ formatDateTime(transaction.date) }}</div>
                 </div>
+              </div>
 
-                <!-- Right: Amount -->
-                <div
-                  class="text-right transaction-right"
-                  :class="transaction.type === 'debit' ? 'text-negative' : 'text-positive'"
-                >
-                  <div class="text-h6 text-weight-bold">
-                    {{ transaction.type === 'debit' ? '-' : '+' }}{{ formatCurrency(transaction.amount) }}
-                  </div>
-                  <div class="text-caption text-weight-bold">{{ authStore.getWalletCurrency }}</div>
-                </div>
+              <q-separator class="q-my-md" />
+
+              <!-- Description -->
+              <div v-if="transaction.description">
+                <div class="text-caption text-weight-bold text-grey">Description</div>
+                <div class="text-body2">{{ transaction.description }}</div>
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="row q-gutter-md q-mt-md">
+                <q-btn
+                  flat
+                  color="primary"
+                  icon="file_download"
+                  label="Download Receipt"
+                  size="sm"
+                />
+                <q-btn
+                  flat
+                  color="primary"
+                  icon="share"
+                  label="Share"
+                  size="sm"
+                />
               </div>
             </q-card-section>
+          </div>
+        </q-slide-transition>
+      </q-card>
 
-            <!-- Expandable Details -->
-            <q-separator />
-            <q-slide-transition>
-              <div v-show="expandedTransactionId === transaction.id">
-                <q-card-section class="bg-grey-1 q-pa-md">
-                  <div class="row justify-between">
-                    <div class="col-sm-6">
-                      <div class="text-caption text-weight-bold text-grey">Transaction ID</div>
-                      <div class="text-body2 q-mb-md break-word">{{ transaction.id }}</div>
-
-                      <div class="text-caption text-weight-bold text-grey">
-                        {{ transaction.type === 'debit' ? 'Recipient' : 'Sender' }}
-                      </div>
-                      <div class="text-body2 q-mb-md">
-                        {{ transaction.counterparty_name }}
-                      </div>
-
-                      <div class="text-caption text-weight-bold text-grey">Wallet Address</div>
-                      <div class="text-body2 q-mb-md break-word text-primary">
-                        {{ transaction.counterparty_address }}
-                      </div>
-                    </div>
-
-                    <div class="col-sm-6">
-                      <div class="text-caption text-weight-bold text-grey">Amount</div>
-                      <div
-                        class="text-body2 q-mb-md text-weight-bold"
-                        :class="transaction.type === 'debit' ? 'text-negative' : 'text-positive'"
-                      >
-                        {{ transaction.type === 'debit' ? '-' : '+' }}{{
-                          formatCurrency(transaction.amount)
-                        }}
-                        {{ authStore.getWalletCurrency }}
-                      </div>
-
-                      <div class="text-caption text-weight-bold text-grey">Status</div>
-                      <q-badge
-                        :label="transaction.status"
-                        :color="getStatusColor(transaction.status)"
-                        text-color="white"
-                        class="q-mb-md"
-                      />
-
-                      <div class="text-caption text-weight-bold text-grey">Date & Time</div>
-                      <div class="text-body2">{{ formatDateTime(transaction.date) }}</div>
-                    </div>
-                  </div>
-
-                  <q-separator class="q-my-md" />
-
-                  <!-- Description -->
-                  <div v-if="transaction.description">
-                    <div class="text-caption text-weight-bold text-grey">Description</div>
-                    <div class="text-body2">{{ transaction.description }}</div>
-                  </div>
-
-                  <!-- Action Buttons -->
-                  <div class="row q-gutter-md q-mt-md">
-                    <q-btn
-                      flat
-                      color="primary"
-                      icon="file_download"
-                      label="Download Receipt"
-                      size="sm"
-                    />
-                    <q-btn
-                      flat
-                      color="primary"
-                      icon="share"
-                      label="Share"
-                      size="sm"
-                    />
-                  </div>
-                </q-card-section>
-              </div>
-            </q-slide-transition>
-          </q-card>
+      <template #loading>
+        <div class="row justify-center q-my-md">
+          <q-spinner color="primary" size="30px" />
         </div>
+      </template>
+    </q-infinite-scroll>
       </main>
     </div>
   </q-page>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useAuthStore } from 'src/stores/auth'
 import { useTransactionStore } from 'src/stores/transaction'
 import { formatCurrency } from 'src/utils/index'
@@ -294,15 +319,17 @@ const transactionStore = useTransactionStore()
 const activeTab = ref('all')
 const expandedTransactionId = ref(null)
 const isNavOpen = ref(false)
+const currentPage = ref(1)
 
 // Fetch transactions on mount
 onMounted(async () => {
-  if (authStore.isAuthenticated) {
+  if (authStore.isAuthenticated && !transactionStore.transactions?.length) {
     await transactionStore.fetchTransactions()
   }
 })
 
 const refreshTransactions = async () => {
+  currentPage.value = 1
   await transactionStore.fetchTransactions()
 }
 
@@ -311,12 +338,16 @@ const filteredTransactions = computed(() => {
   const transactions = transactionStore.transactions || []
 
   if (activeTab.value === 'sent') {
-    return transactions.filter((t) => t.type === 'debit')
+    return transactions
+      .filter((t) => t.type === 'debit')
+      .slice(0, currentPage.value * 10)
   } else if (activeTab.value === 'received') {
-    return transactions.filter((t) => t.type === 'credit')
+    return transactions
+      .filter((t) => t.type === 'credit')
+      .slice(0, currentPage.value * 10)
   }
 
-  return transactions
+  return transactions.slice(0, currentPage.value * 10)
 })
 
 // Computed property for empty message
@@ -327,6 +358,10 @@ const emptyMessage = computed(() => {
     return "You haven't received any money yet"
   }
   return 'No transactions yet. Start by sending or receiving money!'
+})
+
+watch(activeTab, () => {
+  currentPage.value = 1
 })
 
 // Format date to readable format
@@ -378,6 +413,23 @@ const toggleNav = () => {
 
 const closeNav = () => {
   isNavOpen.value = false
+}
+
+const onLoadMore = (index, done) => {
+  currentPage.value += 1
+
+  const allCount = activeTab.value === 'sent'
+    ? (transactionStore.transactions || []).filter((t) => t.type === 'debit').length
+    : activeTab.value === 'received'
+      ? (transactionStore.transactions || []).filter((t) => t.type === 'credit').length
+      : (transactionStore.transactions || []).length
+
+  if (allCount <= currentPage.value * 10) {
+    done(true)
+    return
+  }
+
+  done()
 }
 </script>
 
@@ -548,6 +600,23 @@ const closeNav = () => {
 
 .transaction-list {
   animation: slideUp 0.3s ease;
+}
+
+.transaction-skeleton .transaction-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+}
+
+.skeleton-texts {
+  flex: 1 1 auto;
+  display: grid;
+  gap: 8px;
+}
+
+.skeleton-amount {
+  margin-left: auto;
 }
 
 @keyframes slideUp {
