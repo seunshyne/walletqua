@@ -286,13 +286,15 @@ const closeNav = () => {
   background: #0f1c2e;
   color: #d7e3f4;
   font-family: "Plus Jakarta Sans", "Manrope", "Segoe UI", sans-serif;
+  width: 100%;
 }
 
 .dash-shell {
   display: grid;
-  grid-template-columns: 260px 1fr;
+  grid-template-columns: 260px minmax(0, 1fr);
   min-height: 100vh;
   width: 100%;
+  justify-content: stretch;
 }
 
 .dash-sidebar {
@@ -420,6 +422,7 @@ const closeNav = () => {
 .dash-main {
   padding: 28px 32px 40px;
   min-width: 0;
+  width: 100%;
 }
 
 .dash-topbar {
