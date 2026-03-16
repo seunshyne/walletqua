@@ -14,27 +14,27 @@
         </div>
 
         <nav class="nav">
-          <router-link to="/" class="nav-item is-active" @click="closeNav">
+          <router-link to="/" class="nav-item" active-class="is-active" exact-active-class="is-active" @click="closeNav">
             <q-icon name="grid_view" />
             <span>Home</span>
           </router-link>
-          <router-link to="/dashboard" class="nav-item is-active" @click="closeNav">
+          <router-link to="/dashboard" class="nav-item" active-class="is-active" exact-active-class="is-active" @click="closeNav">
             <q-icon name="grid_view" />
             <span>Dashboard</span>
           </router-link>
-          <router-link to="/transaction-history" class="nav-item" @click="closeNav">
+          <router-link to="/transaction-history" class="nav-item" active-class="is-active" exact-active-class="is-active" @click="closeNav">
             <q-icon name="history" />
             <span>Transaction History</span>
           </router-link>
-          <router-link to="/send" class="nav-item" @click="closeNav">
+          <router-link to="/send" class="nav-item" active-class="is-active" exact-active-class="is-active" @click="closeNav">
             <q-icon name="send" />
             <span>Send</span>
           </router-link>
-          <router-link to="/receive" class="nav-item" @click="closeNav">
+          <router-link to="/receive" class="nav-item" active-class="is-active" exact-active-class="is-active" @click="closeNav">
             <q-icon name="download" />
             <span>Receive</span>
           </router-link>
-          <router-link to="/analytics" class="nav-item" @click="closeNav">
+          <router-link to="/analytics" class="nav-item" active-class="is-active" exact-active-class="is-active" @click="closeNav">
             <q-icon name="leaderboard" />
             <span>Analytics</span>
           </router-link>
@@ -369,6 +369,7 @@ const closeNav = () => {
 .nav-item.is-active {
   background: rgba(123, 96, 255, 0.2);
   color: #d7c6ff;
+  box-shadow: 0 10px 24px rgba(10, 8, 25, 0.45);
 }
 
 .sidebar-footer {
