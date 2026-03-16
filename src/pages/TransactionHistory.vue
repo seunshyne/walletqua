@@ -48,7 +48,7 @@
               <div class="user-tier">Pro Member</div>
             </div>
           </div>
-          <button class="logout-btn">
+          <button class="logout-btn" @click="logout">
             <q-icon name="logout" />
             <span>Logout</span>
           </button>
@@ -76,6 +76,7 @@
           <div class="top-actions">
             <q-btn dense flat round icon="notifications" class="icon-btn" />
             <q-btn dense flat round icon="search" class="icon-btn" />
+            <q-btn flat label="Logout" class="logout-top" @click="logout" />
           </div>
         </header>
 
@@ -415,6 +416,13 @@ const closeNav = () => {
   isNavOpen.value = false
 }
 
+const logout = async () => {
+  const result = await authStore.logout()
+  if (!result?.success) {
+    console.error('Logout action failed:', result)
+  }
+}
+
 const onLoadMore = (index, done) => {
   currentPage.value += 1
 
@@ -596,6 +604,10 @@ const onLoadMore = (index, done) => {
 
 .icon-btn {
   color: #c7d2e8;
+}
+
+.logout-top {
+  color: #ffffff;
 }
 
 .transaction-list {

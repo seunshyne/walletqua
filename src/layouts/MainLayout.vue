@@ -25,6 +25,13 @@
                 {{ walletAddress }}
               </div>
             </div>
+            <q-btn
+              v-if="isHomeRoute"
+              flat
+              label="Dashboard"
+              to="dashboard"
+              class="q-mr-sm"
+            />
             <q-btn flat label="Logout" @click="logout" />
           </template>
           <template v-else>
@@ -60,6 +67,7 @@ const isDashboardRoute = computed(() => {
   const hiddenHeaderRoutes = ['/dashboard', '/send', '/transaction-history'];
   return hiddenHeaderRoutes.some((path) => route.path.startsWith(path));
 });
+const isHomeRoute = computed(() => route.path === '/');
 
 const logout = async () => {
   const result = await authStore.logout();
