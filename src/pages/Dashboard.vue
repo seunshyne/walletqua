@@ -54,16 +54,14 @@
             <q-icon name="send" />
             <span>Send</span>
           </router-link>
-          <router-link
-            to="/receive"
-            class="nav-item"
-            active-class="is-active"
-            exact-active-class="is-active"
-            @click="closeNav"
+          <button
+            type="button"
+            class="nav-item nav-item-disabled"
+            disabled
           >
             <q-icon name="download" />
             <span>Receive</span>
-          </router-link>
+          </button>
           <router-link
               to="/fund-wallet"
               class="nav-item"
@@ -164,7 +162,7 @@
             </div>
             <div>Send</div>
           </button>
-          <button class="quick-card" @click="receiveMoney">
+          <button class="quick-card quick-card-disabled" type="button" disabled>
             <div class="quick-icon">
               <q-icon name="south_west" />
             </div>
@@ -180,7 +178,7 @@
             <div class="quick-icon">
               <q-icon name="add" />
             </div>
-            <div>Top-up</div>
+            <div>Fund Wallet</div>
           </button>
         </section>
 
@@ -406,10 +404,6 @@ const getStatusColor = (status) => {
   }
 };
 
-function receiveMoney() {
-  console.log("Receive money clicked");
-}
-
 const toggleNav = () => {
   isNavOpen.value = !isNavOpen.value;
 };
@@ -505,10 +499,18 @@ const logout = async () => {
   align-items: center;
   gap: 12px;
   padding: 12px 14px;
+  border: none;
   border-radius: 14px;
+  background: transparent;
   color: #b2c1da;
   text-decoration: none;
   transition: background 0.2s ease, color 0.2s ease;
+}
+
+.nav-item-disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
 .nav-item:hover {
@@ -680,6 +682,12 @@ const logout = async () => {
 .quick-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 20px rgba(8, 15, 27, 0.3);
+}
+
+.quick-card-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
 .quick-icon {

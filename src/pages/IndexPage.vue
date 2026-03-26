@@ -44,11 +44,11 @@
 
     <section class="stats">
       <div>
-        <div class="stat-value">200k+</div>
+        <div class="stat-value">{{ animatedActiveUsers }}+</div>
         <div class="stat-label">Active users</div>
       </div>
       <div>
-        <div class="stat-value">NGN 50B+</div>
+        <div class="stat-value">NGN {{ formattedAnimatedTransactions }}+</div>
         <div class="stat-label">Transactions processed</div>
       </div>
       <div>
@@ -204,6 +204,49 @@
     </footer>
   </q-page>
 </template>
+
+<script setup>
+import { computed, onMounted, ref } from 'vue'
+
+const animatedActiveUsers = ref(0)
+const animatedTransactions = ref(0)
+
+const ACTIVE_USERS_TARGET = 100
+const TRANSACTIONS_TARGET = 5000000
+const COUNT_DURATION_MS = 1600
+
+const formattedAnimatedTransactions = computed(() =>
+  animatedTransactions.value.toLocaleString('en-NG')
+)
+
+const animateValue = (target, setter, duration = COUNT_DURATION_MS) => {
+  const startTime = performance.now()
+
+  const step = (currentTime) => {
+    const progress = Math.min((currentTime - startTime) / duration, 1)
+    setter(Math.floor(target * progress))
+
+    if (progress < 1) {
+      requestAnimationFrame(step)
+      return
+    }
+
+    setter(target)
+  }
+
+  requestAnimationFrame(step)
+}
+
+onMounted(() => {
+  animateValue(ACTIVE_USERS_TARGET, (value) => {
+    animatedActiveUsers.value = value
+  })
+
+  animateValue(TRANSACTIONS_TARGET, (value) => {
+    animatedTransactions.value = value
+  })
+})
+</script>
 
 <style scoped>
 .landing {

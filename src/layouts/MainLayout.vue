@@ -3,10 +3,13 @@
     <q-header v-if="!isDashboardRoute" elevated class="site-header">
       <q-toolbar class="header-toolbar">
         <router-link :to="logoDestination" class="brand">
-          <div class="brand-mark">P</div>
+          <div class="brand-badge">
+            <span class="brand-dot"></span>
+            <span class="brand-core"></span>
+          </div>
           <div class="brand-text">
             <div class="brand-name">PrimeWallet</div>
-            <div class="brand-tag">Digital wallet platform</div>
+            <div class="brand-tag">Premium Finance</div>
           </div>
         </router-link>
 
@@ -111,16 +114,29 @@ const logout = async () => {
   color: #ffffff;
 }
 
-.brand-mark {
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #2dd4bf, #38bdf8);
-  color: #051020;
+.brand-badge {
+  width: 46px;
+  height: 46px;
+  border-radius: 16px;
+  background: radial-gradient(circle at top left, #9f4dff, #5d2bff);
   display: grid;
   place-items: center;
-  font-weight: 800;
-  letter-spacing: 0.5px;
+  position: relative;
+}
+
+.brand-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 6px;
+  background: #ffffff;
+}
+
+.brand-core {
+  width: 22px;
+  height: 22px;
+  border-radius: 8px;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  position: absolute;
 }
 
 .brand-text {
@@ -134,8 +150,8 @@ const logout = async () => {
 }
 
 .brand-tag {
-  font-size: 0.72rem;
-  color: #9fb3d1;
+  font-size: 0.8rem;
+  color: #9aa9c4;
 }
 
 .header-links {

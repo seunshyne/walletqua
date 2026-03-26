@@ -30,10 +30,10 @@
             <q-icon name="send" />
             <span>Send</span>
           </router-link>
-          <router-link to="/receive" class="nav-item" @click="closeNav">
+          <button type="button" class="nav-item nav-item-disabled" disabled>
             <q-icon name="download" />
             <span>Receive</span>
-          </router-link>
+          </button>
           <router-link
               to="/fund-wallet"
               class="nav-item"
@@ -473,7 +473,7 @@ const logout = async () => {
 <style scoped>
 .send-page {
   min-height: 100vh;
-  padding: 32px 16px 48px;
+  padding: 0;
   background: #0f1c2e;
   color: #dbe7f7;
   font-family: "Plus Jakarta Sans", "Manrope", "Segoe UI", sans-serif;
@@ -549,7 +549,9 @@ const logout = async () => {
   align-items: center;
   gap: 12px;
   padding: 12px 14px;
+  border: none;
   border-radius: 14px;
+  background: transparent;
   color: #b2c1da;
   text-decoration: none;
   transition: background 0.2s ease, color 0.2s ease;
@@ -558,6 +560,12 @@ const logout = async () => {
 .nav-item:hover {
   background: rgba(123, 96, 255, 0.12);
   color: #ffffff;
+}
+
+.nav-item-disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
 .sidebar-footer {
@@ -881,7 +889,7 @@ const logout = async () => {
 
 @media (max-width: 600px) {
   .send-page {
-    padding: 24px 12px 40px;
+    padding: 0;
   }
 
   .send-hero {

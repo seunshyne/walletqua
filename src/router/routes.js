@@ -59,6 +59,31 @@ const routes = [
       },
     ]
   },
+  {
+    path: '/admin',
+    component: () => import('layouts/AdminLayout.vue'),
+    children: [
+      {
+        path: '',
+        redirect: '/admin/dashboard',
+      },
+      {
+        path: 'dashboard',
+        name: 'admin-dashboard',
+        component: () => import('pages/admin/Dashboard.vue'),
+      },
+      {
+        path: 'users',
+        name: 'admin-users',
+        component: () => import('pages/admin/Users.vue'),
+      },
+      {
+        path: 'transactions',
+        name: 'admin-transactions',
+        component: () => import('pages/admin/Transactions.vue'),
+      },
+    ],
+  },
 
   // Always leave this as last one,
   // but you can also remove it
