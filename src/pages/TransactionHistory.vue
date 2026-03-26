@@ -1,5 +1,5 @@
 <template>
-  <q-page padding>
+  <q-page class="history-page">
     <div class="dash-shell">
       <aside class="dash-sidebar" :class="{ 'is-open': isNavOpen }">
         <div class="brand">
@@ -34,6 +34,16 @@
             <q-icon name="download" />
             <span>Receive</span>
           </router-link>
+          <router-link
+              to="/fund-wallet"
+              class="nav-item"
+              active-class="is-active"
+              exact-active-class="is-active"
+              @click="closeNav"
+            >
+              <q-icon name="account_balance_wallet" />
+              <span>Fund Wallet</span>
+            </router-link>
           <router-link to="/analytics" class="nav-item" @click="closeNav">
             <q-icon name="leaderboard" />
             <span>Analytics</span>
@@ -44,7 +54,7 @@
           <div class="user-chip">
             <div class="user-avatar">AC</div>
             <div>
-              <div class="user-name">{{ authStore.user?.name || 'Alex Carter' }}</div>
+              <div class="user-name">{{ authStore.user?.name }}</div>
               <div class="user-tier">Pro Member</div>
             </div>
           </div>
@@ -65,12 +75,12 @@
               dense
               round
               icon="menu"
-              class="lt-md"
+              class="lt-md mobile-menu-btn"
               aria-label="Toggle navigation"
               @click="toggleNav"
             />
             <div class="greeting">
-              Good morning, <span>{{ authStore.user?.name || 'Alex' }}</span>
+              Good morning, <span>{{ authStore.user?.name }}</span>
             </div>
           </div>
           <div class="top-actions">
@@ -442,6 +452,15 @@ const onLoadMore = (index, done) => {
 </script>
 
 <style scoped>
+.history-page {
+  min-height: 100vh;
+  padding: 32px 16px 48px;
+  background: #0f1c2e;
+  color: #dbe7f7;
+  font-family: "Plus Jakarta Sans", "Manrope", "Segoe UI", sans-serif;
+  width: 100%;
+}
+
 .dash-shell {
   display: flex;
   align-items: stretch;
@@ -610,6 +629,10 @@ const onLoadMore = (index, done) => {
   color: #ffffff;
 }
 
+.mobile-menu-btn {
+  color: #ffffff;
+}
+
 .transaction-list {
   animation: slideUp 0.3s ease;
 }
@@ -645,11 +668,13 @@ const onLoadMore = (index, done) => {
 .transaction-card {
   transition: all 0.3s ease;
   border-radius: 12px;
-  border: 1px solid #f0f0f0;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: #152a42;
+  color: #dbe7f7;
 }
 
 .hover-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 20px rgba(8, 15, 27, 0.28);
   transform: translateY(-2px);
 }
 
@@ -682,6 +707,18 @@ const onLoadMore = (index, done) => {
 .history-header {
   gap: 12px;
   flex-wrap: wrap;
+}
+
+:deep(.q-tabs) {
+  color: #8ea2c2;
+}
+
+:deep(.q-tab--active) {
+  color: #ffffff;
+}
+
+:deep(.q-tab__indicator) {
+  background: #a855f7;
 }
 
 .nav-backdrop {

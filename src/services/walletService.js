@@ -12,6 +12,8 @@ const WALLET_ENDPOINTS = {
   SEND: '/transactions/transfer',
   RECEIVE: '/transactions/receive',
   GET_TRANSACTIONS: '/transactions',
+  FUND_INITIATE: '/wallet/fund/initiate',
+  FUND_VERIFY: '/wallet/fund/verify',
 }
 
 export const walletService = {
@@ -148,6 +150,50 @@ export const walletService = {
       return {
         success: false,
         error: error.message,
+      }
+    }
+  },
+
+  /**
+ * Initiate Paystack wallet funding
+ */
+  async initiateWalletFunding(amount) {
+    try {
+      const response = await apiClient.post(WALLET_ENDPOINTS.FUND_INITIATE, { amount })
+      return {
+        success: true,
+        paymentUrl: response.data.payment_url,
+        reference: response.data.reference,
+        message: response.data.message,
+      }
+    } catch (error) {
+      const errorData = error.response?.data || {}
+      return {
+        success: false,
+        error: errorData.message || error.message || 'Could not initiate payment',
+        statusCode: error.response?.status,
+      }
+    }
+  },
+
+  /**
+   * Verify Paystack payment and credit wallet
+   */
+  async verifyWalletFunding(reference) {
+    try {
+      const response = await apiClient.post(WALLET_ENDPOINTS.FUND_VERIFY, { reference })
+      return {
+        success: true,
+        amount: response.data.amount,
+        balance: response.data.balance,
+        message: response.data.message,
+      }
+    } catch (error) {
+      const errorData = error.response?.data || {}
+      return {
+        success: false,
+        error: errorData.message || error.message || 'Payment verification failed',
+        statusCode: error.response?.status,
       }
     }
   },

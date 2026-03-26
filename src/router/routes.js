@@ -1,49 +1,61 @@
 const routes = [
-{
-  path: '/',
+  {
+    path: '/',
     component: () => import('layouts/MainLayout.vue'),
     children: [
-      { 
-        path: '', 
+      {
+        path: '',
         name: 'home',
-        component: () => import('pages/IndexPage.vue') 
+        component: () => import('pages/IndexPage.vue')
       },
-      { 
-        path: 'dashboard', 
+      {
+        path: 'dashboard',
         name: 'dashboard',
         component: () => import('pages/Dashboard.vue'),
         meta: { requiresAuth: true }
       },
 
-      { 
-        path: 'send', 
+      {
+        path: 'send',
         name: 'send',
         component: () => import('pages/Send.vue'),
         meta: { requiresAuth: true }
       },
-      { 
-        path: 'transaction-history', 
+      {
+        path: 'transaction-history',
         name: 'transaction-history',
         component: () => import('pages/TransactionHistory.vue'),
         meta: { requiresAuth: true }
       },
-      { 
-        path: 'register', 
+      {
+        path: 'register',
         name: 'register',
         component: () => import('pages/auth/Register.vue'),
         meta: { guestOnly: true }
       },
-      { 
-        path: 'login', 
+      {
+        path: 'login',
         name: 'login',
         component: () => import('pages/auth/Login.vue'),
         meta: { guestOnly: true }
       },
-      { 
-        path: 'verify-email', 
+      {
+        path: 'verify-email',
         name: 'verify-email',
         component: () => import('pages/auth/VerifyEmail.vue'),
         meta: { guestOnly: true }
+      },
+      {
+        path: 'fund-wallet',
+        name: 'fund-wallet',
+        component: () => import('pages/FundWalletPage.vue'),
+        meta: { requiresAuth: true }
+      },
+      {
+        path: 'wallet/verify',
+        name: 'wallet-verify',
+        component: () => import('pages/WalletVerifyPage.vue'),
+        meta: { requiresAuth: true }
       },
     ]
   },

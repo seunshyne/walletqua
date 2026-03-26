@@ -216,6 +216,81 @@ export const useTransactionStore = defineStore('transaction', {
 
             }
         },
+        async initiateWalletFunding(amount) {
+            this.loading = true;
+            this.error = "";
+
+            try {
+                const result = await walletService.initiateWalletFunding(amount);
+
+                if (result.success) {
+                    return {
+                        status: 'success',
+                        paymentUrl: result.paymentUrl,
+                        reference: result.reference,
+                        message: result.message,
+                    };
+                }
+
+                const errorMessage = this.parseErrorMessage(
+                    { message: result.error },
+                    result.statusCode
+                );
+                this.error = errorMessage;
+                return {
+                    status: 'error',
+                    message: errorMessage,
+                };
+
+            } catch (err) {
+                const networkError = "Network error. Please check your connection and try again.";
+                this.error = networkError;
+                return {
+                    status: 'error',
+                    message: networkError,
+                };
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        async verifyWalletFunding(reference) {
+            this.loading = true;
+            this.error = "";
+
+            try {
+                const result = await walletService.verifyWalletFunding(reference);
+
+                if (result.success) {
+                    return {
+                        status: 'success',
+                        amount: result.amount,
+                        balance: result.balance,
+                        message: result.message,
+                    };
+                }
+
+                const errorMessage = this.parseErrorMessage(
+                    { message: result.error },
+                    result.statusCode
+                );
+                this.error = errorMessage;
+                return {
+                    status: 'error',
+                    message: errorMessage,
+                };
+
+            } catch (err) {
+                const networkError = "Network error. Please check your connection and try again.";
+                this.error = networkError;
+                return {
+                    status: 'error',
+                    message: networkError,
+                };
+            } finally {
+                this.loading = false;
+            }
+        },
     }
 })
 

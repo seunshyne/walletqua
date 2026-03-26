@@ -14,27 +14,73 @@
         </div>
 
         <nav class="nav">
-          <router-link to="/" class="nav-item" active-class="is-active" exact-active-class="is-active" @click="closeNav">
+          <router-link
+            to="/"
+            class="nav-item"
+            active-class="is-active"
+            exact-active-class="is-active"
+            @click="closeNav"
+          >
             <q-icon name="grid_view" />
             <span>Home</span>
           </router-link>
-          <router-link to="/dashboard" class="nav-item" active-class="is-active" exact-active-class="is-active" @click="closeNav">
+          <router-link
+            to="/dashboard"
+            class="nav-item"
+            active-class="is-active"
+            exact-active-class="is-active"
+            @click="closeNav"
+          >
             <q-icon name="grid_view" />
             <span>Dashboard</span>
           </router-link>
-          <router-link to="/transaction-history" class="nav-item" active-class="is-active" exact-active-class="is-active" @click="closeNav">
+          <router-link
+            to="/transaction-history"
+            class="nav-item"
+            active-class="is-active"
+            exact-active-class="is-active"
+            @click="closeNav"
+          >
             <q-icon name="history" />
             <span>Transaction History</span>
           </router-link>
-          <router-link to="/send" class="nav-item" active-class="is-active" exact-active-class="is-active" @click="closeNav">
+          <router-link
+            to="/send"
+            class="nav-item"
+            active-class="is-active"
+            exact-active-class="is-active"
+            @click="closeNav"
+          >
             <q-icon name="send" />
             <span>Send</span>
           </router-link>
-          <router-link to="/receive" class="nav-item" active-class="is-active" exact-active-class="is-active" @click="closeNav">
+          <router-link
+            to="/receive"
+            class="nav-item"
+            active-class="is-active"
+            exact-active-class="is-active"
+            @click="closeNav"
+          >
             <q-icon name="download" />
             <span>Receive</span>
           </router-link>
-          <router-link to="/analytics" class="nav-item" active-class="is-active" exact-active-class="is-active" @click="closeNav">
+          <router-link
+              to="/fund-wallet"
+              class="nav-item"
+              active-class="is-active"
+              exact-active-class="is-active"
+              @click="closeNav"
+            >
+              <q-icon name="account_balance_wallet" />
+              <span>Fund Wallet</span>
+            </router-link>
+          <router-link
+            to="/analytics"
+            class="nav-item"
+            active-class="is-active"
+            exact-active-class="is-active"
+            @click="closeNav"
+          >
             <q-icon name="leaderboard" />
             <span>Analytics</span>
           </router-link>
@@ -44,7 +90,9 @@
           <div class="user-chip">
             <div class="user-avatar">AC</div>
             <div>
-              <div class="user-name">{{ authStore.user?.name || 'Alex Carter' }}</div>
+              <div class="user-name">
+                {{ authStore.user?.name }}
+              </div>
               <div class="user-tier">Pro Member</div>
             </div>
           </div>
@@ -74,7 +122,7 @@
               @click="toggleNav"
             />
             <div class="greeting">
-              Good morning, <span>{{ authStore.user?.name || 'Alex' }}</span>
+              Good morning, <span>{{ authStore.user?.name }}</span>
             </div>
           </div>
           <div class="top-actions">
@@ -94,7 +142,9 @@
                 width="60%"
                 height="40px"
               />
-              <span v-else>{{ formatCurrency(authStore.getWalletBalance) }}</span>
+              <span v-else>{{
+                formatCurrency(authStore.getWalletBalance)
+              }}</span>
             </div>
             <div class="balance-sub">Total combined balance</div>
           </div>
@@ -105,7 +155,10 @@
         </section>
 
         <section class="quick-actions">
-          <button class="quick-card" @click="() => router.push({ name: 'send' })">
+          <button
+            class="quick-card"
+            @click="() => router.push({ name: 'send' })"
+          >
             <div class="quick-icon">
               <q-icon name="north_east" />
             </div>
@@ -123,7 +176,7 @@
             </div>
             <div>Pay Bills</div>
           </button>
-          <button class="quick-card">
+          <button class="quick-card" @click="router.push('/fund-wallet')">
             <div class="quick-icon">
               <q-icon name="add" />
             </div>
@@ -134,21 +187,27 @@
         <section class="stats-grid">
           <div class="stat-card">
             <div class="stat-title">Monthly Income</div>
-            <div class="stat-value">$4,200 <span class="stat-change up">+12%</span></div>
+            <div class="stat-value">
+              $4,200 <span class="stat-change up">+12%</span>
+            </div>
             <div class="stat-bar">
               <span class="bar-fill teal"></span>
             </div>
           </div>
           <div class="stat-card">
             <div class="stat-title">Total Expenses</div>
-            <div class="stat-value">$2,150 <span class="stat-change down">-5%</span></div>
+            <div class="stat-value">
+              $2,150 <span class="stat-change down">-5%</span>
+            </div>
             <div class="stat-bar">
               <span class="bar-fill rose"></span>
             </div>
           </div>
           <div class="stat-card">
             <div class="stat-title">Savings Rate</div>
-            <div class="stat-value">15% <span class="stat-change up">+2%</span></div>
+            <div class="stat-value">
+              15% <span class="stat-change up">+2%</span>
+            </div>
             <div class="stat-bar">
               <span class="bar-fill purple"></span>
             </div>
@@ -158,7 +217,10 @@
         <section class="transactions">
           <div class="transactions-header">
             <div>Recent Transactions</div>
-            <button class="link-btn" @click="router.push({ name: 'transaction-history' })">
+            <button
+              class="link-btn"
+              @click="router.push({ name: 'transaction-history' })"
+            >
               View all
             </button>
           </div>
@@ -166,31 +228,56 @@
           <div class="transactions-list">
             <div v-if="transactionStore.loading" class="tx-skeletons">
               <div v-for="n in 5" :key="`tx-skeleton-${n}`" class="tx-row">
-                <q-skeleton type="QAvatar" size="44px" class="tx-skeleton-icon" />
+                <q-skeleton
+                  type="QAvatar"
+                  size="44px"
+                  class="tx-skeleton-icon"
+                />
                 <div class="tx-info">
                   <q-skeleton type="text" width="60%" />
                   <q-skeleton type="text" width="40%" />
                 </div>
-                <q-skeleton type="text" width="80px" class="tx-skeleton-amount" />
+                <q-skeleton
+                  type="text"
+                  width="80px"
+                  class="tx-skeleton-amount"
+                />
               </div>
             </div>
-            <div v-else v-for="tx in recentTransactions" :key="tx.id" class="tx-row">
+            <div
+              v-else
+              v-for="tx in recentTransactions"
+              :key="tx.id"
+              class="tx-row"
+            >
               <div class="tx-icon">
-                <q-icon :name="tx.type === 'debit' ? 'payments' : 'account_balance_wallet'" />
+                <q-icon
+                  :name="
+                    tx.type === 'debit' ? 'payments' : 'account_balance_wallet'
+                  "
+                />
               </div>
               <div class="tx-info">
                 <div class="tx-title">
-                  {{ tx.description || tx.counterparty_name || 'Transaction' }}
+                  {{ tx.description || tx.counterparty_name || "Transaction" }}
                 </div>
                 <div class="tx-sub">
-                  {{ formatDate(tx.date || tx.created_at) }} • {{ tx.type || 'transfer' }}
+                  {{ formatDate(tx.date || tx.created_at) }} •
+                  {{ tx.type || "transfer" }}
                 </div>
               </div>
-              <div class="tx-amount" :class="tx.type === 'debit' ? 'negative' : 'positive'">
-                {{ tx.type === 'debit' ? '-' : '+' }}{{ formatCurrency(tx.amount) }}
+              <div
+                class="tx-amount"
+                :class="tx.type === 'debit' ? 'negative' : 'positive'"
+              >
+                {{ tx.type === "debit" ? "-" : "+"
+                }}{{ formatCurrency(tx.amount) }}
               </div>
-              <div class="tx-badge" :class="tx.type === 'debit' ? 'debit' : 'credit'">
-                {{ tx.type === 'debit' ? 'DEBIT' : 'CREDIT' }}
+              <div
+                class="tx-badge"
+                :class="tx.type === 'debit' ? 'debit' : 'credit'"
+              >
+                {{ tx.type === "debit" ? "DEBIT" : "CREDIT" }}
               </div>
             </div>
           </div>
@@ -201,31 +288,31 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { useAuthStore } from 'src/stores/auth'
-import { useTransactionStore } from 'src/stores/transaction'
-import { formatCurrency } from 'src/utils/index'
+import { ref, computed, onMounted } from "vue";
+import { useRouter } from "vue-router";
+import { useAuthStore } from "src/stores/auth";
+import { useTransactionStore } from "src/stores/transaction";
+import { formatCurrency } from "src/utils/index";
 
-const router = useRouter()
-const authStore = useAuthStore()
-const transactionStore = useTransactionStore()
-const isNavOpen = ref(false)
+const router = useRouter();
+const authStore = useAuthStore();
+const transactionStore = useTransactionStore();
+const isNavOpen = ref(false);
 
 // Fetch wallet on mount
 onMounted(async () => {
   if (authStore.isAuthenticated) {
-    const promises = []
+    const promises = [];
 
     if (!authStore.getWalletBalance) {
-      promises.push(authStore.fetchWallet())
+      promises.push(authStore.fetchWallet());
     }
 
     if (!transactionStore.transactions?.length) {
-      promises.push(transactionStore.fetchTransactions())
+      promises.push(transactionStore.fetchTransactions());
     }
 
-    await Promise.all(promises)
+    await Promise.all(promises);
   }
 });
 
@@ -259,62 +346,84 @@ onMounted(async () => {
 // }
 
 const recentTransactions = computed(() => {
-  const transactions = Array.isArray(transactionStore.transactions) ? transactionStore.transactions : []
+  const transactions = Array.isArray(transactionStore.transactions)
+    ? transactionStore.transactions
+    : [];
   return [...transactions]
-    .sort((a, b) => new Date(b.date || b.created_at || 0) - new Date(a.date || a.created_at || 0))
-    .slice(0, 5)
-})
+    .sort(
+      (a, b) =>
+        new Date(b.date || b.created_at || 0) -
+        new Date(a.date || a.created_at || 0)
+    )
+    .slice(0, 5);
+});
 
 const formatDate = (date) => {
-  const d = new Date(date)
-  return d.toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  })
-}
+  const d = new Date(date);
+  return d.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+};
 
 const columns = [
-  { name: 'date', label: 'Date', field: 'date', align: 'left', format: (val) => formatDate(val) },
-  { name: 'type', label: 'Type', field: 'type', align: 'left' },
-  { name: 'counterparty', label: 'Counterparty', field: 'counterparty_name', align: 'left' },
-  { name: 'description', label: 'Description', field: 'description', align: 'left' },
-  { name: 'status', label: 'Status', field: 'status', align: 'left' },
-  { name: 'amount', label: 'Amount', field: 'amount', align: 'right' },
-]
+  {
+    name: "date",
+    label: "Date",
+    field: "date",
+    align: "left",
+    format: (val) => formatDate(val),
+  },
+  { name: "type", label: "Type", field: "type", align: "left" },
+  {
+    name: "counterparty",
+    label: "Counterparty",
+    field: "counterparty_name",
+    align: "left",
+  },
+  {
+    name: "description",
+    label: "Description",
+    field: "description",
+    align: "left",
+  },
+  { name: "status", label: "Status", field: "status", align: "left" },
+  { name: "amount", label: "Amount", field: "amount", align: "right" },
+];
 
 const getStatusColor = (status) => {
   switch (status) {
-    case 'completed':
-    case 'successful':
-      return 'positive'
-    case 'pending':
-      return 'warning'
-    case 'failed':
-      return 'negative'
+    case "completed":
+    case "successful":
+      return "positive";
+    case "pending":
+      return "warning";
+    case "failed":
+      return "negative";
     default:
-      return 'grey'
+      return "grey";
   }
-}
+};
 
 function receiveMoney() {
-  console.log('Receive money clicked');
+  console.log("Receive money clicked");
 }
 
 const toggleNav = () => {
-  isNavOpen.value = !isNavOpen.value
-}
+  isNavOpen.value = !isNavOpen.value;
+};
 
 const closeNav = () => {
-  isNavOpen.value = false
-}
+  isNavOpen.value = false;
+};
 
 const logout = async () => {
-  const result = await authStore.logout()
+  const result = await authStore.logout();
   if (!result?.success) {
-    console.error('Logout action failed:', result)
+    console.error("Logout action failed:", result);
   }
-}
+};
 </script>
 
 <style scoped>
@@ -895,7 +1004,6 @@ const logout = async () => {
     pointer-events: auto;
   }
 }
-
 
 @media (max-width: 560px) {
   .dash-topbar {

@@ -34,6 +34,16 @@
             <q-icon name="download" />
             <span>Receive</span>
           </router-link>
+          <router-link
+              to="/fund-wallet"
+              class="nav-item"
+              active-class="is-active"
+              exact-active-class="is-active"
+              @click="closeNav"
+            >
+              <q-icon name="account_balance_wallet" />
+              <span>Fund Wallet</span>
+            </router-link>
           <router-link to="/analytics" class="nav-item" @click="closeNav">
             <q-icon name="leaderboard" />
             <span>Analytics</span>
@@ -44,7 +54,7 @@
           <div class="user-chip">
             <div class="user-avatar">AC</div>
             <div>
-              <div class="user-name">{{ authStore.user?.name || 'Alex Carter' }}</div>
+              <div class="user-name">{{ authStore.user?.name }}</div>
               <div class="user-tier">Pro Member</div>
             </div>
           </div>
@@ -70,7 +80,7 @@
               @click="toggleNav"
             />
             <div class="greeting">
-              Good morning, <span>{{ authStore.user?.name || 'Alex' }}</span>
+              Good morning, <span>{{ authStore.user?.name }}</span>
             </div>
           </div>
           <div class="top-actions">
@@ -115,7 +125,6 @@
                 <div>
                   <label class="field-label q-mb-sm">Recipient</label>
                   <q-input
-                    square
                     clearable
                     v-model="formData.recipient"
                     type="text"
@@ -151,7 +160,6 @@
 
                 <!-- Amount Input -->
                 <q-input
-                  square
                   v-model.number="formData.amount"
                   type="number"
                   label="Amount"
@@ -171,7 +179,6 @@
 
                 <!-- Description Input -->
                 <q-input
-                  square
                   v-model="formData.description"
                   type="textarea"
                   label="Description (Optional)"
@@ -704,7 +711,7 @@ const logout = async () => {
 }
 
 .send-form :deep(.q-field__control) {
-  border-radius: 18px;
+  border-radius: 22px;
   background: #0f1e33;
   border: 1px solid rgba(148, 163, 184, 0.25);
   color: #e2ebf7;
@@ -713,6 +720,15 @@ const logout = async () => {
 .send-form :deep(.q-field__label),
 .send-form :deep(.q-field__native) {
   color: #c7d4ea;
+}
+
+.send-form :deep(.q-field__prepend),
+.send-form :deep(.q-field__append),
+.send-form :deep(.q-field__marginal),
+.send-form :deep(.q-field__prepend .q-icon),
+.send-form :deep(.q-field__append .q-icon),
+.send-form :deep(.q-field__marginal .q-icon) {
+  color: #ffffff;
 }
 
 .send-form :deep(.q-field__bottom),
