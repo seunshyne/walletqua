@@ -13,9 +13,9 @@
     >
       <div class="drawer-shell">
         <div class="brand-block">
-          <div class="brand-mark">A</div>
+          <div class="brand-mark">P</div>
           <div>
-            <div class="brand-title">Precision Architect</div>
+            <div class="brand-title">PrimeWallet</div>
             <div class="brand-subtitle">System Root</div>
           </div>
         </div>
@@ -39,9 +39,9 @@
             <q-icon name="help_outline" size="20px" />
             <span>Support</span>
           </button>
-          <button class="footer-link" type="button">
+          <button class="footer-link" type="button" :disabled="isLoggingOut" @click="handleLogout">
             <q-icon name="logout" size="20px" />
-            <span>Logout</span>
+            <span>{{ isLoggingOut ? 'Logging out...' : 'Logout' }}</span>
           </button>
         </div>
       </div>
@@ -92,10 +92,10 @@
 
           <div class="admin-profile">
             <div class="profile-copy">
-              <div class="profile-name">Admin User</div>
-              <div class="profile-role">Super Admin</div>
+              <div class="profile-name">{{ adminName }}</div>
+              <div class="profile-role">{{ adminRole }}</div>
             </div>
-            <div class="profile-avatar">AU</div>
+            <div class="profile-avatar">{{ adminInitials }}</div>
           </div>
         </div>
       </q-toolbar>
@@ -108,13 +108,31 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useRouter } from 'vue-router'
+import { useAdminAuthStore } from 'src/stores/adminAuth'
 
+const router = useRouter()
+const adminAuthStore = useAdminAuthStore()
+const { admin } = storeToRefs(adminAuthStore)
 const leftDrawerOpen = ref(true)
 const activeSidebarItem = ref('Overview')
+const isLoggingOut = ref(false)
+
+const adminName = computed(() => adminAuthStore.adminName)
+const adminRole = computed(() => adminAuthStore.adminRole)
+const adminInitials = computed(() => {
+  const source = admin.value?.name || 'Admin User'
+  return source
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() || '')
+    .join('')
+})
 
 const drawerContentStyle = {
-  background: 'linear-gradient(180deg, #151d34 0%, #141c32 58%, #12192d 100%)',
+  background: '#191a1f',
   color: '#c0cae1',
 }
 
@@ -133,6 +151,21 @@ const topItems = [
   { label: 'Users', to: '/admin/users' },
   { label: 'Logs', to: '/admin/dashboard' },
 ]
+
+const handleLogout = async () => {
+  if (isLoggingOut.value) return
+
+  isLoggingOut.value = true
+
+  try {
+    await adminAuthStore.logout()
+    router.push({ name: 'admin-login' })
+  } catch (error) {
+    console.error('Admin logout failed:', error)
+  } finally {
+    isLoggingOut.value = false
+  }
+}
 </script>
 
 <style scoped>
@@ -143,9 +176,13 @@ const topItems = [
   color: #0f172a;
 }
 
+.admin-layout :deep(.q-page-container),
+.admin-layout :deep(.q-page) {
+  background: transparent !important;
+}
+
 .admin-drawer {
-  background:
-    linear-gradient(180deg, #151d34 0%, #141c32 58%, #12192d 100%);
+  background: #191a1f;
   color: #c0cae1;
   border-right: 1px solid rgba(255, 255, 255, 0.04);
   box-shadow: 20px 0 48px rgba(8, 12, 24, 0.22);
@@ -153,8 +190,7 @@ const topItems = [
 
 .admin-drawer :deep(.q-drawer__content),
 :deep(.admin-drawer-content) {
-  background:
-    linear-gradient(180deg, #151d34 0%, #141c32 58%, #12192d 100%) !important;
+  background: #191a1f !important;
   color: #c0cae1;
 }
 
@@ -164,6 +200,7 @@ const topItems = [
   display: flex;
   flex-direction: column;
   gap: 0;
+  background: #191a1f;
 }
 
 .brand-block {
@@ -172,7 +209,7 @@ const topItems = [
   gap: 14px;
   min-height: 112px;
   padding: 0 30px;
-  background: rgba(13, 21, 39, 0.92);
+  background: #191a1f;
   border-bottom: 1px solid rgba(255, 255, 255, 0.03);
 }
 
@@ -250,6 +287,11 @@ const topItems = [
   gap: 12px;
   cursor: pointer;
   text-align: left;
+}
+
+.footer-link:disabled {
+  opacity: 0.65;
+  cursor: wait;
 }
 
 .admin-header {

@@ -7,6 +7,7 @@ import {
 } from 'vue-router'
 import routes from './routes'
 import { useAuthStore } from 'src/stores/auth'
+import { useAdminAuthStore } from 'src/stores/adminAuth'
 
 export default defineRouter(function (/* { store, ssrContext } */) {
   const createHistory = process.env.SERVER
@@ -24,10 +25,15 @@ export default defineRouter(function (/* { store, ssrContext } */) {
   // Global Navigation Guard
   Router.beforeEach(async (to, from, next) => {
     const authStore = useAuthStore()
+    const adminAuthStore = useAdminAuthStore()
 
     // Only check session once per app load
     if (!authStore.sessionChecked) {
       await authStore.getUser()
+    }
+
+    if (!adminAuthStore.sessionChecked) {
+      await adminAuthStore.restoreSession()
     }
 
     if (to.meta.requiresAuth && !authStore.isAuthenticated) {
@@ -36,6 +42,14 @@ export default defineRouter(function (/* { store, ssrContext } */) {
 
     if (to.meta.guestOnly && authStore.isAuthenticated) {
       return next({ name: 'dashboard' })
+    }
+
+    if (to.meta.requiresAdmin && !adminAuthStore.isAuthenticated) {
+      return next({ name: 'admin-login' })
+    }
+
+    if (to.meta.adminGuestOnly && adminAuthStore.isAuthenticated) {
+      return next({ name: 'admin-dashboard' })
     }
 
     next()

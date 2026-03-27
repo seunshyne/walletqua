@@ -3,7 +3,10 @@
     <div class="dashboard-copy">
       <div class="eyebrow">Admin <span>Dashboard</span></div>
       <h1 class="page-title">Intelligence Overview</h1>
+      <p class="page-subtitle">Live metrics from admin analytics summary, user growth, and transaction volume endpoints.</p>
     </div>
+
+    <div v-if="error && !isLoading" class="error-banner">{{ error }}</div>
 
     <section class="stats-grid">
       <article
@@ -33,24 +36,27 @@
         <div class="panel-head">
           <div>
             <div class="panel-title">User Acquisition</div>
-            <div class="panel-subtitle">Daily new users over the last 30 days</div>
+            <div class="panel-subtitle">Daily user registrations over the last 30 days</div>
           </div>
           <div class="panel-actions">
             <span class="live-badge">Live</span>
-            <q-btn flat round dense icon="more_vert" color="grey-7" />
           </div>
         </div>
 
-        <div class="bar-chart">
+        <div v-if="isLoading" class="chart-loading">
+          <q-skeleton v-for="n in 8" :key="n" class="chart-skeleton" />
+        </div>
+
+        <div v-else class="bar-chart">
           <div
-            v-for="point in userBars"
+            v-for="point in userSeries"
             :key="point.label"
             class="bar-wrap"
           >
             <div class="bar-track">
-              <div class="bar-fill" :style="{ height: `${point.value}%` }"></div>
+              <div class="bar-fill" :style="{ height: `${point.normalizedValue}%` }"></div>
             </div>
-            <div class="bar-label">{{ point.label }}</div>
+            <div class="bar-label">{{ formatShortDate(point.label) }}</div>
           </div>
         </div>
 
@@ -59,42 +65,36 @@
             <span class="legend-dot primary"></span>
             <span>New registrations</span>
           </div>
-          <div class="footer-highlight">+4.2% versus previous month</div>
+          <div class="footer-highlight">{{ totalUsersLast30Days }} users in 30 days</div>
         </div>
       </q-card>
 
-      <q-card flat class="panel-card transaction-panel">
+      <q-card flat class="panel-card chart-panel">
         <div class="panel-head">
           <div>
-            <div class="panel-title">Transaction Velocity</div>
-            <div class="panel-subtitle">Settled volume (USD) aggregated daily</div>
+            <div class="panel-title">Transaction Volume</div>
+            <div class="panel-subtitle">Daily settled volume over the last 30 days</div>
           </div>
-          <div class="transaction-tools">
-            <button class="text-tool" type="button">
-              <q-icon name="filter_list" />
-              <span>Filters</span>
-            </button>
-            <button class="icon-tool" type="button">
-              <q-icon name="download" />
-            </button>
+          <div class="panel-actions">
+            <span class="live-badge muted">Volume</span>
           </div>
         </div>
 
-        <div class="velocity-state">
-          <div class="placeholder-line wide"></div>
-          <div class="placeholder-line mid"></div>
-          <div class="placeholder-line wide"></div>
-          <div class="placeholder-chart">
-            <div class="placeholder-peak"></div>
-            <div class="placeholder-bars">
-              <span></span>
-              <span></span>
-              <span></span>
-              <span></span>
+        <div v-if="isLoading" class="chart-loading">
+          <q-skeleton v-for="n in 8" :key="`tx-${n}`" class="chart-skeleton" />
+        </div>
+
+        <div v-else class="bar-chart">
+          <div
+            v-for="point in transactionSeries"
+            :key="point.label"
+            class="bar-wrap"
+          >
+            <div class="bar-track">
+              <div class="bar-fill volume-fill" :style="{ height: `${point.normalizedValue}%` }"></div>
             </div>
+            <div class="bar-label">{{ formatShortDate(point.label) }}</div>
           </div>
-          <div class="placeholder-line short"></div>
-          <div class="placeholder-line wide bottom"></div>
         </div>
 
         <div class="chart-footer muted-footer">
@@ -102,171 +102,141 @@
             <span class="legend-dot slate"></span>
             <span>Total volume</span>
           </div>
-          <div class="footer-muted">Consistent upward trend maintained</div>
+          <div class="footer-highlight">{{ formatCurrency(totalVolumeLast30Days) }}</div>
         </div>
       </q-card>
     </section>
 
-    <section class="audit-panel">
-      <div class="audit-head">
-        <div class="audit-title">Precision Audit Trail</div>
-        <button class="audit-link" type="button">View All Activities</button>
-      </div>
+    <section class="insight-grid">
+      <article class="insight-card">
+        <div class="insight-label">User Health</div>
+        <div class="insight-value">{{ activeRate }}%</div>
+        <p class="insight-copy">Active-user ratio based on the current analytics summary.</p>
+      </article>
 
-      <div class="audit-table">
-        <div class="audit-row audit-header-row">
-          <div>Event Entity</div>
-          <div>Operation</div>
-          <div>Status</div>
-          <div>Intensity</div>
-          <div>Timestamp</div>
-        </div>
+      <article class="insight-card">
+        <div class="insight-label">Suspension Watch</div>
+        <div class="insight-value">{{ summary?.suspended_users ?? 0 }}</div>
+        <p class="insight-copy">Accounts currently marked as suspended.</p>
+      </article>
 
-        <div
-          v-for="item in auditRows"
-          :key="item.id"
-          class="audit-row audit-body-row"
-        >
-          <div class="entity-cell">
-            <div class="entity-avatar">{{ item.initials }}</div>
-            <div>
-              <div class="entity-name">{{ item.name }}</div>
-              <div class="entity-id">ID: {{ item.id }}</div>
-            </div>
-          </div>
-
-          <div class="operation-cell">{{ item.operation }}</div>
-
-          <div>
-            <span class="status-pill" :class="`status-${item.statusTone}`">
-              {{ item.status }}
-            </span>
-          </div>
-
-          <div>
-            <div class="intensity-track">
-              <span
-                class="intensity-fill"
-                :class="`intensity-${item.statusTone}`"
-                :style="{ width: item.intensity }"
-              ></span>
-            </div>
-          </div>
-
-          <div class="timestamp-cell">{{ item.time }}</div>
-        </div>
-      </div>
+      <article class="insight-card">
+        <div class="insight-label">Flagged Risk</div>
+        <div class="insight-value">{{ summary?.flagged_transactions ?? 0 }}</div>
+        <p class="insight-copy">Transactions flagged for admin review.</p>
+      </article>
     </section>
   </q-page>
 </template>
 
 <script setup>
-const statCards = [
+import { computed, onMounted } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useAdminAnalyticsStore } from 'src/stores/adminAnalyticsStore'
+
+const analyticsStore = useAdminAnalyticsStore()
+const { summary, userSeries, transactionSeries, isLoading, error } = storeToRefs(analyticsStore)
+
+onMounted(async () => {
+  try {
+    await analyticsStore.fetchAnalytics()
+  } catch (error) {
+    console.error('Failed to fetch admin analytics:', error)
+  }
+})
+
+const statCards = computed(() => [
   {
     label: 'Total Users',
-    value: '12,450',
-    change: '+12%',
-    changeTone: 'positive',
-    subcopy: 'Platform-wide accounts',
+    value: formatNumber(summary.value?.total_users ?? 0),
+    change: 'Accounts',
+    changeTone: 'neutral',
+    subcopy: 'Registered user accounts',
     icon: 'person',
     variant: 'indigo',
   },
   {
-    label: 'Active',
-    value: '10,120',
-    change: '81% rate',
-    changeTone: 'neutral',
-    subcopy: 'Healthy engagement',
+    label: 'Active Users',
+    value: formatNumber(summary.value?.active_users ?? 0),
+    change: `${activeRate.value}%`,
+    changeTone: 'positive',
+    subcopy: 'Currently active accounts',
     icon: 'flash_on',
     variant: 'violet',
   },
   {
     label: 'Suspended',
-    value: '2,330',
-    change: '+2.4%',
+    value: formatNumber(summary.value?.suspended_users ?? 0),
+    change: 'Review',
     changeTone: 'negative',
-    subcopy: 'Accounts under review',
+    subcopy: 'Accounts under restriction',
     icon: 'block',
     variant: 'red',
   },
   {
     label: 'Transactions',
-    value: '45,670',
-    change: 'New ATH',
-    changeTone: 'positive',
-    subcopy: 'Lifetime processed',
+    value: formatNumber(summary.value?.total_transactions ?? 0),
+    change: 'Lifetime',
+    changeTone: 'neutral',
+    subcopy: 'Processed transaction count',
     icon: 'event_note',
     variant: 'slate',
   },
   {
     label: 'Volume',
-    value: '$1.2M',
-    change: 'USD',
+    value: formatCurrency(summary.value?.total_volume ?? 0),
+    change: 'Success',
     changeTone: 'brand',
-    subcopy: 'Successful settlements',
+    subcopy: 'Successful transaction volume',
     icon: 'account_balance_wallet',
     variant: 'blue',
   },
   {
     label: 'Flagged',
-    value: '89',
-    change: 'Action Req.',
+    value: formatNumber(summary.value?.flagged_transactions ?? 0),
+    change: 'Alert',
     changeTone: 'warning',
-    subcopy: 'Marked for review',
+    subcopy: 'Flagged transaction count',
     icon: 'warning_amber',
     variant: 'amber',
   },
-]
+])
 
-const userBars = [
-  { label: '01 May', value: 24 },
-  { label: '04 May', value: 42 },
-  { label: '08 May', value: 36 },
-  { label: '12 May', value: 55 },
-  { label: '15 May', value: 72 },
-  { label: '18 May', value: 66 },
-  { label: '22 May', value: 88 },
-  { label: '26 May', value: 100 },
-]
+const totalUsersLast30Days = computed(() =>
+  userSeries.value.reduce((sum, item) => sum + item.value, 0)
+)
 
-const auditRows = [
-  {
-    name: 'John Doe',
-    initials: 'JD',
-    id: '88231-X',
-    operation: 'Large Volume Withdrawal',
-    status: 'Flagged',
-    statusTone: 'warning',
-    intensity: '76%',
-    time: '2 min ago',
-  },
-  {
-    name: 'Alice Smith',
-    initials: 'AS',
-    id: '10293-A',
-    operation: 'Subscription Upgrade',
-    status: 'Success',
-    statusTone: 'brand',
-    intensity: '26%',
-    time: '15 min ago',
-  },
-  {
-    name: 'Robert Brown',
-    initials: 'RB',
-    id: '44210-C',
-    operation: 'Password Reset',
-    status: 'Completed',
-    statusTone: 'slate',
-    intensity: '100%',
-    time: '1 hr ago',
-  },
-]
+const totalVolumeLast30Days = computed(() =>
+  transactionSeries.value.reduce((sum, item) => sum + item.value, 0)
+)
+
+const activeRate = computed(() => {
+  const total = Number(summary.value?.total_users || 0)
+  const active = Number(summary.value?.active_users || 0)
+  if (!total) return 0
+  return Math.round((active / total) * 100)
+})
+
+const formatCurrency = (value) =>
+  new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'NGN',
+    maximumFractionDigits: 0,
+  }).format(Number(value || 0))
+
+const formatNumber = (value) =>
+  new Intl.NumberFormat('en-US').format(Number(value || 0))
+
+const formatShortDate = (value) => {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return value
+  return new Intl.DateTimeFormat('en-US', { month: 'short', day: '2-digit' }).format(date)
+}
 </script>
 
 <style scoped>
 .admin-dashboard {
   padding: 42px 38px 48px;
-  background: transparent;
 }
 
 .dashboard-copy {
@@ -281,11 +251,11 @@ const auditRows = [
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #27324a;
+  color: #64748b;
 }
 
 .eyebrow span {
-  color: #2336d7;
+  color: #334155;
 }
 
 .page-title {
@@ -294,6 +264,22 @@ const auditRows = [
   line-height: 1;
   font-weight: 800;
   color: #111827;
+}
+
+.page-subtitle {
+  margin: 12px 0 0;
+  max-width: 760px;
+  color: #475569;
+  line-height: 1.7;
+}
+
+.error-banner {
+  margin-bottom: 18px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: #feeceb;
+  color: #b42318;
+  font-weight: 700;
 }
 
 .stats-grid {
@@ -322,29 +308,12 @@ const auditRows = [
   background: var(--card-accent);
 }
 
-.variant-indigo {
-  --card-accent: #2942d3;
-}
-
-.variant-violet {
-  --card-accent: #6b7cff;
-}
-
-.variant-red {
-  --card-accent: #d11a1d;
-}
-
-.variant-slate {
-  --card-accent: #586983;
-}
-
-.variant-blue {
-  --card-accent: #3052ff;
-}
-
-.variant-amber {
-  --card-accent: #8a3b05;
-}
+.variant-indigo { --card-accent: #2942d3; }
+.variant-violet { --card-accent: #6b7cff; }
+.variant-red { --card-accent: #d11a1d; }
+.variant-slate { --card-accent: #586983; }
+.variant-blue { --card-accent: #3052ff; }
+.variant-amber { --card-accent: #8a3b05; }
 
 .metric-head {
   display: flex;
@@ -354,7 +323,7 @@ const auditRows = [
 }
 
 .metric-label {
-  max-width: 100px;
+  max-width: 112px;
   color: #20293a;
   font-size: 0.94rem;
   font-weight: 700;
@@ -387,25 +356,11 @@ const auditRows = [
   font-weight: 700;
 }
 
-.metric-change.positive {
-  color: #16a34a;
-}
-
-.metric-change.neutral {
-  color: #64748b;
-}
-
-.metric-change.negative {
-  color: #dc2626;
-}
-
-.metric-change.brand {
-  color: #3248ff;
-}
-
-.metric-change.warning {
-  color: #92400e;
-}
+.metric-change.positive { color: #16a34a; }
+.metric-change.neutral { color: #64748b; }
+.metric-change.negative { color: #dc2626; }
+.metric-change.brand { color: #3248ff; }
+.metric-change.warning { color: #92400e; }
 
 .metric-subcopy {
   margin-top: 10px;
@@ -413,14 +368,16 @@ const auditRows = [
   font-size: 0.95rem;
 }
 
-.analytics-grid {
+.analytics-grid,
+.insight-grid {
   margin-top: 22px;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 22px;
 }
 
-.panel-card {
+.panel-card,
+.insight-card {
   border-radius: 20px;
   background: rgba(245, 247, 255, 0.96);
   border: 1px solid rgba(219, 227, 241, 0.9);
@@ -437,7 +394,7 @@ const auditRows = [
 }
 
 .panel-title {
-  font-size: 1.65rem;
+  font-size: 1.4rem;
   line-height: 1.1;
   font-weight: 800;
   color: #111827;
@@ -448,11 +405,10 @@ const auditRows = [
 .panel-subtitle {
   margin-top: 6px;
   color: #475569;
-  font-size: 1.03rem;
+  font-size: 1rem;
 }
 
-.panel-actions,
-.transaction-tools {
+.panel-actions {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -472,10 +428,31 @@ const auditRows = [
   letter-spacing: 0.08em;
 }
 
+.live-badge.muted {
+  background: #e2e8f0;
+  color: #334155;
+}
+
+.chart-loading,
 .bar-chart {
   height: 360px;
   padding: 16px 28px 10px;
   border-top: 1px solid rgba(226, 232, 240, 0.9);
+}
+
+.chart-loading {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: 10px;
+  align-items: end;
+}
+
+.chart-skeleton {
+  border-radius: 12px 12px 0 0;
+  height: 100%;
+}
+
+.bar-chart {
   display: grid;
   grid-template-columns: repeat(8, minmax(0, 1fr));
   align-items: end;
@@ -502,15 +479,14 @@ const auditRows = [
   background: linear-gradient(180deg, #d2d9ff 0%, #b8c0ff 100%);
 }
 
-.bar-wrap:nth-child(7) .bar-fill,
-.bar-wrap:nth-child(8) .bar-fill {
-  background: linear-gradient(180deg, #aeb9ff 0%, #94a3ff 100%);
+.volume-fill {
+  background: linear-gradient(180deg, #b9c8ff 0%, #7f95ff 100%);
 }
 
 .bar-label {
   color: #1f2937;
   font-weight: 700;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   text-align: center;
 }
 
@@ -525,12 +501,16 @@ const auditRows = [
   gap: 16px;
 }
 
+.muted-footer {
+  background: #eef2ff;
+}
+
 .legend-copy {
   display: flex;
   align-items: center;
   gap: 10px;
   color: #20293a;
-  font-size: 0.98rem;
+  font-size: 0.96rem;
   font-weight: 700;
   text-transform: uppercase;
 }
@@ -541,292 +521,45 @@ const auditRows = [
   border-radius: 50%;
 }
 
-.legend-dot.primary {
-  background: #2844d1;
-}
-
-.legend-dot.slate {
-  background: #64748b;
-}
+.legend-dot.primary { background: #2844d1; }
+.legend-dot.slate { background: #64748b; }
 
 .footer-highlight {
   color: #2138d4;
-  font-size: 1.02rem;
+  font-size: 1rem;
   font-weight: 800;
 }
 
-.text-tool,
-.icon-tool {
-  border: none;
-  background: transparent;
-  color: #334155;
-  cursor: pointer;
+.insight-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
-.text-tool {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.96rem;
-  font-weight: 800;
-  text-transform: uppercase;
-}
-
-.icon-tool {
-  width: 40px;
-  height: 40px;
-}
-
-.velocity-state {
-  height: 360px;
-  padding: 34px 44px 22px;
-  border-top: 1px solid rgba(226, 232, 240, 0.9);
-}
-
-.placeholder-line {
-  height: 10px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, rgba(223, 228, 250, 0.9), rgba(237, 241, 255, 0.95));
-  margin-bottom: 30px;
-}
-
-.placeholder-line.wide {
-  width: 92%;
-}
-
-.placeholder-line.mid {
-  width: 70%;
-}
-
-.placeholder-line.short {
-  width: 75%;
-}
-
-.placeholder-line.bottom {
-  margin-bottom: 0;
-}
-
-.placeholder-chart {
-  height: 120px;
-  margin: 8px auto 30px;
-  width: 160px;
-  position: relative;
-}
-
-.placeholder-peak {
-  position: absolute;
-  inset: 10px 0 auto;
-  height: 64px;
-  border-left: 16px solid transparent;
-  border-right: 16px solid transparent;
-  border-bottom: 16px solid transparent;
-}
-
-.placeholder-peak::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 8px;
-  height: 52px;
-  border: 10px solid #cdd5ef;
-  border-top: 0;
-  border-right: 0;
-  transform: skewY(-42deg);
-  opacity: 0.8;
-}
-
-.placeholder-bars {
-  position: absolute;
-  left: 30px;
-  right: 30px;
-  bottom: 0;
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-}
-
-.placeholder-bars span {
-  width: 14px;
-  border-radius: 8px 8px 0 0;
-  background: #cdd5ef;
-}
-
-.placeholder-bars span:nth-child(1) {
-  height: 24px;
-}
-
-.placeholder-bars span:nth-child(2) {
-  height: 50px;
-}
-
-.placeholder-bars span:nth-child(3) {
-  height: 42px;
-}
-
-.placeholder-bars span:nth-child(4) {
-  height: 74px;
-}
-
-.muted-footer {
-  background: #eef2ff;
-}
-
-.footer-muted {
-  color: #475569;
-  font-size: 1.02rem;
-  font-weight: 700;
-}
-
-.audit-panel {
-  margin-top: 24px;
-  border-radius: 20px;
-  overflow: hidden;
-  background: rgba(255, 255, 255, 0.96);
-  border: 1px solid rgba(219, 227, 241, 0.9);
-  box-shadow: 0 18px 40px rgba(30, 41, 59, 0.05);
-}
-
-.audit-head {
-  min-height: 94px;
-  padding: 0 30px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.audit-title {
-  font-size: 1.85rem;
-  font-weight: 800;
-  color: #111827;
-}
-
-.audit-link {
-  border: none;
-  background: transparent;
-  color: #2336d7;
-  font-weight: 800;
-  cursor: pointer;
-}
-
-.audit-table {
-  width: 100%;
-}
-
-.audit-row {
+.insight-card {
+  min-height: 220px;
+  padding: 28px;
   display: grid;
-  grid-template-columns: 1.45fr 1.55fr 0.9fr 1fr 0.8fr;
-  gap: 16px;
-  align-items: center;
-}
-
-.audit-header-row {
-  min-height: 50px;
-  padding: 0 30px;
-  background: #ebefff;
-  color: #20293a;
-  font-size: 0.92rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-}
-
-.audit-body-row {
-  min-height: 84px;
-  padding: 0 30px;
-  border-top: 1px solid #edf1fb;
-}
-
-.entity-cell {
-  display: flex;
-  align-items: center;
+  align-content: start;
   gap: 14px;
 }
 
-.entity-avatar {
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  background: linear-gradient(135deg, #0f172a, #475569);
-  color: #ffffff;
-  font-size: 0.85rem;
-  font-weight: 700;
-}
-
-.entity-name {
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: #111827;
-}
-
-.entity-id {
-  margin-top: 2px;
+.insight-label {
   color: #64748b;
-  font-size: 0.88rem;
-}
-
-.operation-cell {
-  font-size: 1.08rem;
-  color: #111827;
-}
-
-.status-pill {
-  min-height: 28px;
-  padding: 0 12px;
-  border-radius: 6px;
-  display: inline-flex;
-  align-items: center;
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   font-weight: 800;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
 }
 
-.status-warning {
-  background: #ffd8bf;
-  color: #7c2d12;
+.insight-value {
+  color: #111827;
+  font-size: 2.6rem;
+  font-weight: 800;
 }
 
-.status-brand {
-  background: #dbdeff;
-  color: #1726a6;
-}
-
-.status-slate {
-  background: #dbeafe;
-  color: #1e3a8a;
-}
-
-.intensity-track {
-  height: 8px;
-  border-radius: 999px;
-  background: #e7ebf7;
-  overflow: hidden;
-}
-
-.intensity-fill {
-  display: block;
-  height: 100%;
-  border-radius: inherit;
-}
-
-.intensity-warning {
-  background: #7c2d12;
-}
-
-.intensity-brand {
-  background: #2942d3;
-}
-
-.intensity-slate {
-  background: #64748b;
-}
-
-.timestamp-cell {
-  color: #1f2937;
-  font-weight: 700;
-  text-transform: uppercase;
+.insight-copy {
+  margin: 0;
+  color: #64748b;
+  line-height: 1.7;
 }
 
 @media (max-width: 1439px) {
@@ -836,16 +569,9 @@ const auditRows = [
 }
 
 @media (max-width: 1159px) {
-  .analytics-grid {
+  .analytics-grid,
+  .insight-grid {
     grid-template-columns: 1fr;
-  }
-
-  .audit-row {
-    grid-template-columns: 1.2fr 1.2fr 0.8fr 0.8fr;
-  }
-
-  .audit-row > :last-child {
-    display: none;
   }
 }
 
@@ -859,24 +585,13 @@ const auditRows = [
   }
 
   .chart-footer,
-  .panel-head,
-  .audit-head {
+  .panel-head {
     padding-left: 18px;
     padding-right: 18px;
   }
 
-  .bar-chart {
-    padding-left: 18px;
-    padding-right: 18px;
-  }
-
-  .velocity-state {
-    padding-left: 18px;
-    padding-right: 18px;
-  }
-
-  .audit-header-row,
-  .audit-body-row {
+  .bar-chart,
+  .chart-loading {
     padding-left: 18px;
     padding-right: 18px;
   }
@@ -887,7 +602,8 @@ const auditRows = [
     grid-template-columns: 1fr;
   }
 
-  .bar-chart {
+  .bar-chart,
+  .chart-loading {
     height: 280px;
     gap: 6px;
   }
@@ -896,29 +612,12 @@ const auditRows = [
     font-size: 0.75rem;
   }
 
-  .chart-footer,
-  .audit-head {
+  .chart-footer {
     min-height: auto;
     padding-top: 16px;
     padding-bottom: 16px;
     flex-direction: column;
     align-items: flex-start;
-  }
-
-  .audit-header-row {
-    display: none;
-  }
-
-  .audit-body-row {
-    padding-top: 18px;
-    padding-bottom: 18px;
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-
-  .operation-cell,
-  .timestamp-cell {
-    font-size: 0.98rem;
   }
 }
 </style>

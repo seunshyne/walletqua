@@ -60,6 +60,18 @@ const routes = [
     ]
   },
   {
+    path: '/admin/login',
+    component: () => import('layouts/BlankLayout.vue'),
+    children: [
+      {
+        path: '',
+        name: 'admin-login',
+        component: () => import('pages/admin/Login.vue'),
+        meta: { adminGuestOnly: true },
+      },
+    ],
+  },
+  {
     path: '/admin',
     component: () => import('layouts/AdminLayout.vue'),
     children: [
@@ -71,16 +83,25 @@ const routes = [
         path: 'dashboard',
         name: 'admin-dashboard',
         component: () => import('pages/admin/Dashboard.vue'),
+        meta: { requiresAdmin: true },
       },
       {
         path: 'users',
         name: 'admin-users',
-        component: () => import('pages/admin/Users.vue'),
+        component: () => import('pages/admin/UserManagement.vue'),
+        meta: { requiresAdmin: true },
+      },
+      {
+        path: 'users/:id',
+        name: 'admin-user-detail',
+        component: () => import('pages/admin/UserDetail.vue'),
+        meta: { requiresAdmin: true },
       },
       {
         path: 'transactions',
         name: 'admin-transactions',
         component: () => import('pages/admin/Transactions.vue'),
+        meta: { requiresAdmin: true },
       },
     ],
   },
