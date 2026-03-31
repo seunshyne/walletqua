@@ -40,6 +40,18 @@ const routes = [
         meta: { guestOnly: true }
       },
       {
+        path: 'forgot-password',
+        name: 'forgot-password',
+        component: () => import('pages/auth/ForgotPassword.vue'),
+        meta: { guestOnly: true }
+      },
+      {
+        path: 'reset-password',
+        name: 'reset-password',
+        component: () => import('pages/auth/ResetPassword.vue'),
+        meta: { guestOnly: true }
+      },
+      {
         path: 'verify-email',
         name: 'verify-email',
         component: () => import('pages/auth/VerifyEmail.vue'),
@@ -55,6 +67,12 @@ const routes = [
         path: 'wallet/verify',
         name: 'wallet-verify',
         component: () => import('pages/WalletVerifyPage.vue'),
+        meta: { requiresAuth: true }
+      },
+      {
+        path: 'change-password',
+        name: 'change-password',
+        component: () => import('pages/auth/ChangePassword.vue'),
         meta: { requiresAuth: true }
       },
     ]

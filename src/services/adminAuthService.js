@@ -1,4 +1,6 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://primewallet.duckdns.org'
+import { API_BASE_URL } from 'src/constants/api'
+
+const ADMIN_API_BASE_URL = API_BASE_URL
 const ADMIN_AUTH_ENDPOINTS = {
   LOGIN: '/api/admin/login',
   LOGOUT: '/api/admin/logout',
@@ -50,7 +52,7 @@ export const adminAuthService = {
 
   async login(email, password) {
     try {
-      const response = await fetch(`${API_BASE_URL}${ADMIN_AUTH_ENDPOINTS.LOGIN}`, {
+      const response = await fetch(`${ADMIN_API_BASE_URL}${ADMIN_AUTH_ENDPOINTS.LOGIN}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -105,7 +107,7 @@ export const adminAuthService = {
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}${ADMIN_AUTH_ENDPOINTS.ME}`, {
+      const response = await fetch(`${ADMIN_API_BASE_URL}${ADMIN_AUTH_ENDPOINTS.ME}`, {
         method: 'GET',
         headers: {
           Accept: 'application/json',
@@ -159,7 +161,7 @@ export const adminAuthService = {
 
     try {
       if (token) {
-        await fetch(`${API_BASE_URL}${ADMIN_AUTH_ENDPOINTS.LOGOUT}`, {
+        await fetch(`${ADMIN_API_BASE_URL}${ADMIN_AUTH_ENDPOINTS.LOGOUT}`, {
           method: 'POST',
           headers: {
             Accept: 'application/json',

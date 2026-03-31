@@ -4,7 +4,7 @@
  * Uses HttpOnly session cookies (Laravel Sanctum) — no tokens in localStorage.
  */
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://primewallet.duckdns.org'
+import { API_BASE_URL } from 'src/constants/api'
 
 class APIClient {
   constructor(baseURL = API_BASE_URL) {

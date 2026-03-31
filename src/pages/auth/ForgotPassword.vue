@@ -1,53 +1,39 @@
 <script setup>
-import { reactive, computed, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
-import { useAuthStore } from 'src/stores/auth'
-
-const route = useRoute()
-const authStore = useAuthStore()
-
-const errors = computed(() => authStore.errors)
-const message = computed(() => authStore.message)
-const isLoading = computed(() => authStore.isLoading)
-const isAuthenticated = computed(() => authStore.isAuthenticated)
+import { computed, reactive, ref } from 'vue'
+import { isValidEmail } from 'src/utils/index'
+import passwordService from 'src/services/passwordService'
 
 const formData = reactive({
   email: '',
-  password: '',
 })
 
-const passwordVisibility = reactive({
-  showPassword: false,
-})
+const errors = ref({})
+const message = ref('')
+const isLoading = ref(false)
+
+const emailHasFormatError = computed(() => !!formData.email && !isValidEmail(formData.email))
 
 const handleSubmit = async () => {
-  // router.push is handled inside the store's authenticate() action
-  await authStore.authenticate('login', formData)
-}
+  errors.value = {}
+  message.value = ''
 
-onMounted(() => {
-  if (isAuthenticated.value) {
-    // Already logged in — store's router will handle redirect,
-    // but we can also push here as a safety net
+  if (emailHasFormatError.value) {
+    errors.value = { email: ['Enter a valid email address.'] }
     return
   }
 
-  // Clear any stale errors/messages from previous navigation
-  authStore.errors = {}
-  authStore.message = ''
+  isLoading.value = true
 
-  // Handle email verification redirect messages
-  const verified = route.query.verified
-  if (verified === 'success') {
-    authStore.message = 'Email verified successfully! You can now login.'
-  } else if (verified === 'already') {
-    authStore.message = 'Email already verified. Please login.'
-  } else if (verified === 'invalid') {
-    authStore.errors = { general: 'Invalid or expired verification link. Please request a new one.' }
-  } else if (verified === 'error') {
-    authStore.errors = { general: 'Verification failed. Please try again.' }
+  const result = await passwordService.forgotPassword(formData.email)
+
+  if (result.success) {
+    message.value = result.message
+  } else {
+    errors.value = result.errors || { general: result.message }
   }
-})
+
+  isLoading.value = false
+}
 </script>
 
 <template>
@@ -62,65 +48,34 @@ onMounted(() => {
             </div>
             <div class="brand-name">PrimeWallet</div>
           </div>
-          <h2 class="auth-title">Welcome back</h2>
-          <p class="auth-subtitle">Sign in to continue</p>
+          <h2 class="auth-title">Forgot your password?</h2>
+          <p class="auth-subtitle">Enter your email and we'll send you a reset link.</p>
         </q-card-section>
 
-        <!-- Success message -->
         <q-card-section v-if="message" class="q-pb-none">
           <p class="text-positive q-mb-none">{{ message }}</p>
         </q-card-section>
 
-        <!-- Error messages -->
         <q-card-section v-if="errors.general || errors.network" class="q-pb-none">
-          <p class="text-negative q-mb-none">
-            {{ errors.general || errors.network }}
-          </p>
+          <p class="text-negative q-mb-none">{{ errors.general || errors.network }}</p>
         </q-card-section>
 
         <q-card-section class="auth-body">
           <q-form @submit.prevent="handleSubmit" class="auth-form">
             <div class="field-label">Email address</div>
             <q-input
-              clearable
               v-model="formData.email"
+              clearable
               type="email"
               label="name@company.com"
-              :error="!!errors.email"
-              :error-message="errors.email?.[0]"
+              :error="!!errors.email || emailHasFormatError"
+              :error-message="errors.email?.[0] || (emailHasFormatError ? 'Invalid email format' : '')"
               class="auth-input"
               dense
               outlined
             >
-              <template v-slot:prepend>
+              <template #prepend>
                 <q-icon name="email" />
-              </template>
-            </q-input>
-
-            <div class="field-row">
-              <div class="field-label">Password</div>
-              <router-link to="/forgot-password" class="inline-link">Forgot password?</router-link>
-            </div>
-            <q-input
-              clearable
-              v-model="formData.password"
-              :type="passwordVisibility.showPassword ? 'text' : 'password'"
-              label="Enter password"
-              :error="!!errors.password"
-              :error-message="errors.password?.[0]"
-              class="auth-input"
-              dense
-              outlined
-            >
-              <template v-slot:prepend>
-                <q-icon name="lock" />
-              </template>
-              <template v-slot:append>
-                <q-icon
-                  :name="passwordVisibility.showPassword ? 'visibility_off' : 'visibility'"
-                  class="cursor-pointer"
-                  @click="passwordVisibility.showPassword = !passwordVisibility.showPassword"
-                />
               </template>
             </q-input>
 
@@ -129,7 +84,7 @@ onMounted(() => {
                 unelevated
                 size="lg"
                 class="auth-submit full-width"
-                label="Sign in"
+                label="Send reset link"
                 type="submit"
                 :loading="isLoading"
               />
@@ -139,8 +94,8 @@ onMounted(() => {
 
         <q-card-section class="auth-footer">
           <p>
-            No account?
-            <router-link to="/register">Create one</router-link>
+            Remembered your password?
+            <router-link to="/login">Return to login</router-link>
           </p>
         </q-card-section>
       </q-card>
@@ -239,23 +194,6 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 16px;
-}
-
-.field-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.inline-link {
-  color: #2563eb;
-  font-size: 0.82rem;
-  font-weight: 600;
-  text-decoration: none;
-}
-
-.inline-link:hover {
-  text-decoration: underline;
 }
 
 .field-label {

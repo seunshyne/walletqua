@@ -1,6 +1,7 @@
 import adminAuthService from 'src/services/adminAuthService'
+import { API_BASE_URL } from 'src/constants/api'
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://primewallet.duckdns.org'
+const ADMIN_API_BASE_URL = API_BASE_URL
 const ADMIN_ANALYTICS_ENDPOINTS = {
   SUMMARY: '/api/admin/analytics/summary',
   TRANSACTIONS: '/api/admin/analytics/transactions',
@@ -24,7 +25,7 @@ const buildAuthHeaders = () => {
 }
 
 const getJson = async (endpoint, fallbackMessage) => {
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+  const response = await fetch(`${ADMIN_API_BASE_URL}${endpoint}`, {
     method: 'GET',
     headers: buildAuthHeaders(),
   })

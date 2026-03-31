@@ -82,6 +82,16 @@
             <q-icon name="leaderboard" />
             <span>Analytics</span>
           </router-link>
+          <router-link
+            to="/change-password"
+            class="nav-item"
+            active-class="is-active"
+            exact-active-class="is-active"
+            @click="closeNav"
+          >
+            <q-icon name="key" />
+            <span>Change Password</span>
+          </router-link>
         </nav>
 
         <div class="sidebar-footer">
@@ -126,6 +136,7 @@
           <div class="top-actions">
             <q-btn dense flat round icon="notifications" class="icon-btn" />
             <q-btn dense flat round icon="search" class="icon-btn" />
+            <q-btn flat label="Change Password" class="change-password-top" @click="router.push('/change-password')" />
             <q-btn flat label="Logout" class="logout-top" @click="logout" />
           </div>
         </header>
@@ -606,6 +617,10 @@ const logout = async () => {
   color: #ffffff;
 }
 
+.change-password-top {
+  color: #d7c6ff;
+}
+
 .greeting-wrap {
   display: flex;
   align-items: center;
@@ -1018,6 +1033,10 @@ const logout = async () => {
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
+  }
+
+  .top-actions {
+    flex-wrap: wrap;
   }
 
   .quick-actions {

@@ -32,7 +32,7 @@ const handleSubmit = async () => {
     <div class="admin-login-shell">
       <section class="admin-login-aside">
         <div class="aside-badge">Admin Access</div>
-        <h1 class="aside-title">Precision control for your operations team.</h1>
+        <h1 class="aside-title">Secure access to your financial control center.</h1>
         <p class="aside-copy">
           Sign in with your admin credentials to access user management, transaction oversight,
           verification review, and audit activity.
@@ -54,10 +54,10 @@ const handleSubmit = async () => {
         <q-card-section class="admin-login-header">
           <div class="brand-row">
             <div class="brand-badge">
-              <span class="brand-glyph">A</span>
+              <span class="brand-glyph">P</span>
             </div>
             <div>
-              <div class="brand-title">Precision Architect</div>
+              <div class="brand-title">PrimeWallet</div>
               <div class="brand-subtitle">System Root</div>
             </div>
           </div>

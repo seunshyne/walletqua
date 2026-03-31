@@ -75,7 +75,8 @@
             :key="item.label"
             :to="item.to"
             class="top-link"
-            active-class="is-active"
+            :class="{ 'is-active': activeTopItem === item.label }"
+            @click="activeTopItem = item.label"
           >
             {{ item.label }}
           </router-link>
@@ -108,16 +109,18 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useAdminAuthStore } from 'src/stores/adminAuth'
 
 const router = useRouter()
+const route = useRoute()
 const adminAuthStore = useAdminAuthStore()
 const { admin } = storeToRefs(adminAuthStore)
 const leftDrawerOpen = ref(true)
 const activeSidebarItem = ref('Overview')
+const activeTopItem = ref('Dashboard')
 const isLoggingOut = ref(false)
 
 const adminName = computed(() => adminAuthStore.adminName)
@@ -151,6 +154,26 @@ const topItems = [
   { label: 'Users', to: '/admin/users' },
   { label: 'Logs', to: '/admin/dashboard' },
 ]
+
+watch(
+  () => route.path,
+  (path) => {
+    if (path === '/admin/users' || path.startsWith('/admin/users/')) {
+      activeTopItem.value = 'Users'
+      return
+    }
+
+    if (path === '/admin/transactions') {
+      activeTopItem.value = 'Dashboard'
+      return
+    }
+
+    if (path === '/admin/dashboard') {
+      activeTopItem.value = 'Dashboard'
+    }
+  },
+  { immediate: true },
+)
 
 const handleLogout = async () => {
   if (isLoggingOut.value) return
@@ -428,7 +451,7 @@ const handleLogout = async () => {
   font-weight: 700;
 }
 
-@media (max-width: 1279px) {
+@media (max-width: 1024px) {
   .toolbar-shell {
     grid-template-columns: minmax(220px, 1fr) auto;
   }

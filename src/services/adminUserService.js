@@ -1,6 +1,7 @@
 import adminAuthService from 'src/services/adminAuthService'
+import { API_BASE_URL } from 'src/constants/api'
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://primewallet.duckdns.org'
+const ADMIN_API_BASE_URL = API_BASE_URL
 const ADMIN_USER_ENDPOINTS = {
   USERS: '/api/admin/users',
 }
@@ -23,7 +24,7 @@ const buildAuthHeaders = () => {
 
 export const adminUserService = {
   async getUsers() {
-    const response = await fetch(`${API_BASE_URL}${ADMIN_USER_ENDPOINTS.USERS}`, {
+    const response = await fetch(`${ADMIN_API_BASE_URL}${ADMIN_USER_ENDPOINTS.USERS}`, {
       method: 'GET',
       headers: buildAuthHeaders(),
     })
@@ -41,7 +42,7 @@ export const adminUserService = {
   },
 
   async getUser(id) {
-    const response = await fetch(`${API_BASE_URL}${ADMIN_USER_ENDPOINTS.USERS}/${id}`, {
+    const response = await fetch(`${ADMIN_API_BASE_URL}${ADMIN_USER_ENDPOINTS.USERS}/${id}`, {
       method: 'GET',
       headers: buildAuthHeaders(),
     })
@@ -59,7 +60,7 @@ export const adminUserService = {
   },
 
   async suspendUser(id) {
-    const response = await fetch(`${API_BASE_URL}${ADMIN_USER_ENDPOINTS.USERS}/${id}/suspend`, {
+    const response = await fetch(`${ADMIN_API_BASE_URL}${ADMIN_USER_ENDPOINTS.USERS}/${id}/suspend`, {
       method: 'PATCH',
       headers: buildAuthHeaders(),
     })
@@ -77,7 +78,7 @@ export const adminUserService = {
   },
 
   async unsuspendUser(id) {
-    const response = await fetch(`${API_BASE_URL}${ADMIN_USER_ENDPOINTS.USERS}/${id}/unsuspend`, {
+    const response = await fetch(`${ADMIN_API_BASE_URL}${ADMIN_USER_ENDPOINTS.USERS}/${id}/unsuspend`, {
       method: 'PATCH',
       headers: buildAuthHeaders(),
     })

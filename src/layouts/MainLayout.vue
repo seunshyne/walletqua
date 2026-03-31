@@ -67,7 +67,7 @@ const logoDestination = computed(() => {
   return isAuthenticated.value ? { path: 'dashboard' } : { path: '/' };
 });
 const isDashboardRoute = computed(() => {
-  const hiddenHeaderRoutes = ['/dashboard', '/send', '/transaction-history'];
+  const hiddenHeaderRoutes = ['/dashboard', '/send', '/transaction-history', '/change-password'];
   return hiddenHeaderRoutes.some((path) => route.path.startsWith(path));
 });
 const isHomeRoute = computed(() => route.path === '/');

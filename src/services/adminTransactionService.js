@@ -1,6 +1,7 @@
 import adminAuthService from 'src/services/adminAuthService'
+import { API_BASE_URL } from 'src/constants/api'
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://primewallet.duckdns.org'
+const ADMIN_API_BASE_URL = API_BASE_URL
 const ADMIN_TRANSACTION_ENDPOINTS = {
   TRANSACTIONS: '/api/admin/transactions',
 }
@@ -23,7 +24,7 @@ const buildAuthHeaders = () => {
 
 export const adminTransactionService = {
   async getTransactions() {
-    const response = await fetch(`${API_BASE_URL}${ADMIN_TRANSACTION_ENDPOINTS.TRANSACTIONS}`, {
+    const response = await fetch(`${ADMIN_API_BASE_URL}${ADMIN_TRANSACTION_ENDPOINTS.TRANSACTIONS}`, {
       method: 'GET',
       headers: buildAuthHeaders(),
     })
@@ -41,7 +42,7 @@ export const adminTransactionService = {
   },
 
   async getTransaction(id) {
-    const response = await fetch(`${API_BASE_URL}${ADMIN_TRANSACTION_ENDPOINTS.TRANSACTIONS}/${id}`, {
+    const response = await fetch(`${ADMIN_API_BASE_URL}${ADMIN_TRANSACTION_ENDPOINTS.TRANSACTIONS}/${id}`, {
       method: 'GET',
       headers: buildAuthHeaders(),
     })
@@ -59,7 +60,7 @@ export const adminTransactionService = {
   },
 
   async flagTransaction(id) {
-    const response = await fetch(`${API_BASE_URL}${ADMIN_TRANSACTION_ENDPOINTS.TRANSACTIONS}/${id}/flag`, {
+    const response = await fetch(`${ADMIN_API_BASE_URL}${ADMIN_TRANSACTION_ENDPOINTS.TRANSACTIONS}/${id}/flag`, {
       method: 'PATCH',
       headers: buildAuthHeaders(),
     })
@@ -77,7 +78,7 @@ export const adminTransactionService = {
   },
 
   async unflagTransaction(id) {
-    const response = await fetch(`${API_BASE_URL}${ADMIN_TRANSACTION_ENDPOINTS.TRANSACTIONS}/${id}/unflag`, {
+    const response = await fetch(`${ADMIN_API_BASE_URL}${ADMIN_TRANSACTION_ENDPOINTS.TRANSACTIONS}/${id}/unflag`, {
       method: 'PATCH',
       headers: buildAuthHeaders(),
     })
